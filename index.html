@@ -8,13 +8,15 @@
 html,body{
   margin:0;padding:0;width:100%;height:100%;overflow:hidden;
   background:#020617;color:#e5e7eb;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+  font-family:"Segoe UI Variable","Segoe UI",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
 }
 #desktop{
   position:absolute;inset:0;
+  /* Windows 11-ish abstract wallpaper */
   background:
-    radial-gradient(circle at 20% 20%, #1d4ed8 0, transparent 45%),
-    radial-gradient(circle at 80% 80%, #a855f7 0, transparent 50%),
+    radial-gradient(circle at 20% 20%, #2563eb 0, transparent 45%),
+    radial-gradient(circle at 70% 80%, #06b6d4 0, transparent 50%),
+    radial-gradient(circle at 90% 0%, #a855f7 0, transparent 45%),
     #020617;
 }
 
@@ -31,7 +33,7 @@ html,body{
   height:48px;
   margin:0 auto 4px;
   border-radius:14px;
-  background:#1d4ed8;
+  background:linear-gradient(135deg,#1d4ed8,#22c55e);
   display:flex;
   align-items:center;
   justify-content:center;
@@ -47,14 +49,27 @@ html,body{
 #taskbar{
   position:absolute;
   left:0;right:0;bottom:0;
-  height:52px;
-  background:rgba(15,23,42,0.78);
-  border-top:1px solid rgba(148,163,184,0.45);
+  height:54px;
   display:flex;
   align-items:center;
   padding:0 8px;
   z-index:200;
-  backdrop-filter:blur(18px);
+  pointer-events:none; /* inner elements re-enable */
+}
+#taskbar-inner{
+  margin:0 auto 6px;
+  height:48px;
+  max-width:720px;
+  width:calc(100% - 32px);
+  background:rgba(15,23,42,0.82);
+  border-radius:999px;
+  border:1px solid rgba(148,163,184,0.45);
+  display:flex;
+  align-items:center;
+  padding:0 12px;
+  box-shadow:0 14px 40px rgba(0,0,0,0.75);
+  backdrop-filter:blur(22px);
+  pointer-events:auto;
 }
 #taskbar-left,
 #taskbar-center,
@@ -65,47 +80,72 @@ html,body{
 #taskbar-center{
   flex:1;
   justify-content:center;
-  gap:6px;
+  gap:4px;
 }
-#taskbar-left{gap:6px;}
+#taskbar-left{
+  gap:4px;
+}
 #taskbar-right{
   gap:10px;
   min-width:190px;
   justify-content:flex-end;
 }
 
-/* Start button */
-.start-btn{
-  width:38px;
-  height:38px;
-  border-radius:11px;
-  border:none;
-  background:#1d4ed8;
-  color:#f9fafb;
+/* Start + fixed taskbar icons */
+.tb-icon{
+  width:32px;
+  height:32px;
+  border-radius:8px;
   display:flex;
   align-items:center;
   justify-content:center;
   cursor:pointer;
-  box-shadow:0 3px 8px rgba(0,0,0,0.6);
-  font-size:20px;
+  color:#e5e7eb;
+  font-size:18px;
 }
-.start-btn:hover{
-  background:#2563eb;
+.tb-icon:hover{
+  background:rgba(148,163,184,0.35);
 }
 
-/* Task buttons */
+/* Start button with Windows logo */
+#start-button{
+  width:32px;
+  height:32px;
+  border-radius:9px;
+  border:none;
+  background:transparent;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+}
+#start-logo{
+  width:20px;
+  height:20px;
+  border-radius:4px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  grid-template-rows:1fr 1fr;
+  gap:1px;
+}
+#start-logo div{
+  background:#e5e7eb;
+}
+
+/* Task buttons (for open windows) */
 .task-button{
-  padding:5px 12px;
+  padding:5px 10px;
   border-radius:10px;
   border:none;
-  background:rgba(148,163,184,0.3);
+  background:transparent;
   color:#e5e7eb;
   font-size:12px;
   cursor:pointer;
   white-space:nowrap;
 }
 .task-button.active{
-  background:rgba(59,130,246,0.9);
+  background:rgba(148,163,184,0.35);
 }
 
 /* Tray icons */
@@ -133,20 +173,21 @@ html,body{
   position:absolute;
   width:520px;
   height:380px;
-  background:#020617;
+  background:rgba(15,23,42,0.98);
   border-radius:14px;
-  border:1px solid rgba(148,163,184,0.6);
-  box-shadow:0 22px 55px rgba(0,0,0,0.8);
+  border:1px solid rgba(148,163,184,0.5);
+  box-shadow:0 22px 55px rgba(0,0,0,0.9);
   display:flex;
   flex-direction:column;
   z-index:100;
+  backdrop-filter:blur(16px);
 }
 .whead{
   height:34px;
   display:flex;
   align-items:center;
   padding:0 10px;
-  background:linear-gradient(90deg,rgba(148,163,184,0.45),rgba(15,23,42,0.95));
+  background:linear-gradient(90deg,rgba(148,163,184,0.3),rgba(15,23,42,0.95));
   cursor:move;
 }
 .wtitle{
@@ -155,20 +196,27 @@ html,body{
 }
 .win-controls{
   display:flex;
-  gap:4px;
+  gap:2px;
 }
 .win-btn{
-  width:26px;
-  height:22px;
-  border-radius:6px;
+  width:36px;
+  height:28px;
+  border-radius:3px;
   border:none;
   background:transparent;
   color:#e5e7eb;
   cursor:pointer;
-  font-size:13px;
+  font-size:14px;
+}
+.win-btn span{
+  position:relative;
+  top:-1px;
 }
 .win-btn:hover{
-  background:rgba(148,163,184,0.4);
+  background:rgba(148,163,184,0.3);
+}
+.win-btn.close{
+  border-radius:4px;
 }
 .win-btn.close:hover{
   background:#dc2626;
@@ -205,21 +253,21 @@ canvas{
 /* Start menu */
 #start-menu{
   position:absolute;
-  bottom:64px;
+  bottom:80px;
   left:50%;
   transform:translateX(-50%);
   width:520px;
   max-width:95vw;
-  height:430px;
+  height:460px;
   background:rgba(15,23,42,0.96);
   border-radius:22px;
   border:1px solid rgba(148,163,184,0.55);
-  box-shadow:0 24px 70px rgba(0,0,0,0.9);
+  box-shadow:0 28px 80px rgba(0,0,0,0.95);
   padding:18px 20px 12px;
   box-sizing:border-box;
   display:none;
   z-index:250;
-  backdrop-filter:blur(20px);
+  backdrop-filter:blur(22px);
 }
 #start-top-row{
   display:flex;
@@ -235,15 +283,16 @@ canvas{
   gap:8px;
 }
 #start-user-avatar{
-  width:26px;
-  height:26px;
+  width:28px;
+  height:28px;
   border-radius:999px;
   background:linear-gradient(135deg,#38bdf8,#a855f7);
 }
-#start-pinned-title{
+#start-pinned-title,
+#start-rec-title{
   font-size:12px;
   color:#9ca3af;
-  margin:8px 0;
+  margin:8px 0 6px;
 }
 #start-grid{
   display:grid;
@@ -274,9 +323,56 @@ canvas{
   margin-bottom:4px;
   font-size:18px;
 }
+#start-rec{
+  margin-top:4px;
+  border-radius:14px;
+  background:#020617;
+  padding:6px 8px;
+  box-sizing:border-box;
+}
+.rec-item{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:4px 4px;
+  border-radius:8px;
+  font-size:11px;
+}
+.rec-item:hover{
+  background:#111827;
+}
+.rec-left{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.rec-icon{
+  width:22px;height:22px;
+  border-radius:6px;
+  background:#1f2937;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:14px;
+}
+.rec-meta{
+  display:flex;
+  flex-direction:column;
+}
+.rec-name{
+  font-size:11px;
+}
+.rec-sub{
+  color:#9ca3af;
+  font-size:10px;
+}
+.rec-right{
+  color:#9ca3af;
+  font-size:10px;
+}
 #start-search{
   width:100%;
-  margin-top:14px;
+  margin-top:10px;
   padding:7px 10px;
   border-radius:8px;
   border:1px solid #374151;
@@ -289,36 +385,46 @@ canvas{
 /* Quick settings panel */
 #quick-panel{
   position:absolute;
-  bottom:64px;
-  right:12px;
-  width:320px;
+  bottom:80px;
+  right:24px;
+  width:340px;
   background:rgba(15,23,42,0.96);
-  border-radius:18px;
+  border-radius:20px;
   border:1px solid rgba(148,163,184,0.55);
-  box-shadow:0 24px 70px rgba(0,0,0,0.9);
-  padding:12px 14px;
+  box-shadow:0 28px 80px rgba(0,0,0,0.95);
+  padding:14px 14px 12px;
   box-sizing:border-box;
   display:none;
   z-index:260;
-  backdrop-filter:blur(20px);
+  backdrop-filter:blur(22px);
   font-size:12px;
+}
+.q-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+  margin-bottom:10px;
+}
+.q-tile{
+  border-radius:12px;
+  background:#111827;
+  padding:8px 6px;
+  box-sizing:border-box;
+  text-align:center;
+  cursor:pointer;
+}
+.q-tile.active{
+  background:#1d4ed8;
+}
+.q-tile-label{
+  font-size:11px;
+  margin-top:4px;
 }
 .q-row{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  margin-bottom:10px;
-}
-.q-toggle{
-  padding:6px 12px;
-  border-radius:10px;
-  border:1px solid #4b5563;
-  background:#111827;
-  cursor:pointer;
-}
-.q-toggle.active{
-  background:#1d4ed8;
-  border-color:#3b82f6;
+  margin-bottom:8px;
 }
 .q-label{
   color:#d1d5db;
@@ -327,7 +433,7 @@ canvas{
   width:100%;
 }
 
-/* Store app styles */
+/* Store app styles (unchanged logic, just fits theme) */
 .store-layout{
   display:flex;
   height:100%;
@@ -475,22 +581,58 @@ canvas{
       <div>Guest</div>
     </div>
   </div>
+
   <div id="start-pinned-title">Pinned</div>
   <div id="start-grid"></div>
+
+  <div id="start-rec-title">Recommended</div>
+  <div id="start-rec">
+    <div class="rec-item">
+      <div class="rec-left">
+        <div class="rec-icon">📝</div>
+        <div class="rec-meta">
+          <div class="rec-name">Notes.txt</div>
+          <div class="rec-sub">Text Document</div>
+        </div>
+      </div>
+      <div class="rec-right">Just now</div>
+    </div>
+    <div class="rec-item">
+      <div class="rec-left">
+        <div class="rec-icon">🎮</div>
+        <div class="rec-meta">
+          <div class="rec-name">Snake</div>
+          <div class="rec-sub">Game</div>
+        </div>
+      </div>
+      <div class="rec-right">Recently</div>
+    </div>
+  </div>
+
   <input id="start-search" placeholder="Type to search (fake)" />
 </div>
 
 <!-- Quick settings panel -->
 <div id="quick-panel">
-  <div class="q-row">
-    <span class="q-label">Wi-Fi</span>
-    <button id="wifi-toggle" class="q-toggle active">On</button>
+  <div class="q-grid">
+    <div id="tile-wifi" class="q-tile active">
+      <div>📶</div>
+      <div class="q-tile-label">Wi-Fi</div>
+    </div>
+    <div id="tile-bt" class="q-tile">
+      <div>🌀</div>
+      <div class="q-tile-label">Bluetooth</div>
+    </div>
+    <div id="tile-airplane" class="q-tile">
+      <div>✈️</div>
+      <div class="q-tile-label">Airplane</div>
+    </div>
   </div>
   <div class="q-row">
     <span class="q-label">Volume</span>
-    <input id="vol-slider" class="q-slider" type="range" min="0" max="100" value="70">
   </div>
-  <div class="q-row">
+  <input id="vol-slider" class="q-slider" type="range" min="0" max="100" value="70">
+  <div class="q-row" style="margin-top:8px;">
     <span class="q-label">Battery</span>
     <span id="battery-status" class="q-label">100% • Plugged in</span>
   </div>
@@ -498,41 +640,56 @@ canvas{
 
 <!-- Taskbar -->
 <div id="taskbar">
-  <div id="taskbar-left">
-    <button id="start-button" class="start-btn" title="Start">⊞</button>
-  </div>
-  <div id="taskbar-center"></div>
-  <div id="taskbar-right">
-    <!-- Wi-Fi -->
-    <div id="wifi-icon" class="tray-icon" title="Wi-Fi">
-      <svg viewBox="0 0 24 24">
-        <path d="M12 18.5c-.7 0-1.3.3-1.8.7l1.8 2.3 1.8-2.3c-.5-.4-1.1-.7-1.8-.7z"/>
-        <path d="M4.9 13.6 3 11.7C5.5 9.2 8.6 8 12 8s6.5 1.2 9 3.7l-1.9 1.9C17.2 11.7 14.8 11 12 11s-5.2.7-7.1 2.6z"/>
-        <path d="M8.3 17 6.4 15.1C7.9 13.6 9.8 13 12 13s4.1.6 5.6 2.1L15.7 17C14.6 15.9 13.4 15.5 12 15.5S9.4 15.9 8.3 17z"/>
-      </svg>
+  <div id="taskbar-inner">
+    <div id="taskbar-left">
+      <!-- Start button -->
+      <button id="start-button" title="Start">
+        <div id="start-logo">
+          <div></div><div></div>
+          <div></div><div></div>
+        </div>
+      </button>
+
+      <!-- Search, Task View, Widgets, Chat icons (visual only) -->
+      <div class="tb-icon" title="Search">🔍</div>
+      <div class="tb-icon" title="Task view">🗔</div>
+      <div class="tb-icon" title="Widgets">⬛</div>
+      <div class="tb-icon" title="Chat">💬</div>
     </div>
 
-    <!-- Volume -->
-    <div id="volume-icon" class="tray-icon" title="Volume">
-      <svg viewBox="0 0 24 24">
-        <path d="M4 9v6h3l4 4V5L7 9H4z"/>
-        <path d="M16.5 8.1 15.1 9.5c.6.6.9 1.4.9 2.5s-.3 1.9-.9 2.5l1.4 1.4C17.5 14.9 18 13.8 18 12s-.5-2.9-1.5-3.9z"/>
-        <path d="m18.9 5.7-1.4 1.4C18.4 8 19 9.8 19 12s-.6 4-1.5 4.9l1.4 1.4C20.3 17.7 21 15.9 21 12s-.7-5.7-2.1-6.3z"/>
-      </svg>
-    </div>
+    <div id="taskbar-center"></div>
 
-    <!-- Battery -->
-    <div id="battery-icon" class="tray-icon" title="Battery">
-      <svg viewBox="0 0 24 24">
-        <rect x="3" y="8" width="14" height="8" rx="1.5" ry="1.5"/>
-        <rect x="18" y="10" width="2" height="4" rx="1" ry="1"/>
-        <rect x="4.5" y="9.5" width="9" height="5" fill="#22c55e"/>
-      </svg>
-    </div>
+    <div id="taskbar-right">
+      <!-- Wi-Fi -->
+      <div id="wifi-icon" class="tray-icon" title="Network, volume, battery">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 18.5c-.7 0-1.3.3-1.8.7l1.8 2.3 1.8-2.3c-.5-.4-1.1-.7-1.8-.7z"/>
+          <path d="M4.9 13.6 3 11.7C5.5 9.2 8.6 8 12 8s6.5 1.2 9 3.7l-1.9 1.9C17.2 11.7 14.8 11 12 11s-5.2.7-7.1 2.6z"/>
+          <path d="M8.3 17 6.4 15.1C7.9 13.6 9.8 13 12 13s4.1.6 5.6 2.1L15.7 17C14.6 15.9 13.4 15.5 12 15.5S9.4 15.9 8.3 17z"/>
+        </svg>
+      </div>
 
-    <div class="timebox">
-      <div id="clock-time"></div>
-      <div id="clock-date"></div>
+      <!-- Volume (visual only, grouped with wifi) -->
+      <div id="volume-icon" class="tray-icon" title="Volume">
+        <svg viewBox="0 0 24 24">
+          <path d="M4 9v6h3l4 4V5L7 9H4z"/>
+          <path d="M16.5 8.1 15.1 9.5c.6.6.9 1.4.9 2.5s-.3 1.9-.9 2.5l1.4 1.4C17.5 14.9 18 13.8 18 12s-.5-2.9-1.5-3.9z"/>
+        </svg>
+      </div>
+
+      <!-- Battery -->
+      <div id="battery-icon" class="tray-icon" title="Battery status">
+        <svg viewBox="0 0 24 24">
+          <rect x="3" y="8" width="14" height="8" rx="1.5" ry="1.5"/>
+          <rect x="18" y="10" width="2" height="4" rx="1" ry="1"/>
+          <rect x="4.5" y="9.5" width="9" height="5" fill="#22c55e"/>
+        </svg>
+      </div>
+
+      <div class="timebox">
+        <div id="clock-time"></div>
+        <div id="clock-date"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -541,9 +698,8 @@ canvas{
 let zCounter = 100;
 const windowsMap = new Map();
 const desktop = document.getElementById("desktop");
-let dynamicIconCount = 1; // store column row counter
+let dynamicIconCount = 1;
 
-/* App metadata */
 const appMeta = {
   browser:{label:"Browser",icon:"🌐"},
   notes:{label:"Notes",icon:"📝"},
@@ -658,7 +814,9 @@ function openApp(appId){
     "<div class='whead'>" +
       "<div class='wtitle'></div>" +
       "<div class='win-controls'>" +
-        "<button class='win-btn close'>✕</button>" +
+        "<button class='win-btn'><span>—</span></button>" +
+        "<button class='win-btn'><span>□</span></button>" +
+        "<button class='win-btn close'><span>✕</span></button>" +
       "</div>" +
     "</div>" +
     "<div class='wbody'></div>";
@@ -720,7 +878,7 @@ function openApp(appId){
     body.innerHTML = "<canvas id='game2048-canvas' width='320' height='320'></canvas>";
     start2048(body.querySelector("#game2048-canvas"));
   }else if(appId==="store"){
-    title = "Windows Store";
+    title = "Microsoft Store (Mock)";
     body.innerHTML = `
       <div class="store-layout">
         <div class="store-sidebar">
@@ -743,7 +901,7 @@ function openApp(appId){
     startPaint(body.querySelector("#paint-canvas"));
   }else if(appId==="music"){
     body.innerHTML = `
-      <p>Music Player (fake)</p>
+      <p>Music Player (mock)</p>
       <ul>
         <li>♫ Chill Beats – Playing</li>
         <li>♫ Focus Mode</li>
@@ -845,10 +1003,13 @@ const startButton = document.getElementById("start-button");
 const wifiIcon = document.getElementById("wifi-icon");
 const volumeIcon = document.getElementById("volume-icon");
 const batteryIcon = document.getElementById("battery-icon");
-const wifiToggle = document.getElementById("wifi-toggle");
 const volSlider = document.getElementById("vol-slider");
 const batteryStatus = document.getElementById("battery-status");
 const startGrid = document.getElementById("start-grid");
+
+const tileWifi = document.getElementById("tile-wifi");
+const tileBt = document.getElementById("tile-bt");
+const tileAirplane = document.getElementById("tile-airplane");
 
 const pinnedApps = new Set([
   "browser","notes","files",
@@ -896,9 +1057,11 @@ wifiIcon.addEventListener("click", toggleQuickPanel);
 volumeIcon.addEventListener("click", toggleQuickPanel);
 batteryIcon.addEventListener("click", toggleQuickPanel);
 
-wifiToggle.addEventListener("click", ()=>{
-  wifiToggle.classList.toggle("active");
-  wifiToggle.textContent = wifiToggle.classList.contains("active") ? "On" : "Off";
+/* Quick settings tile toggles (purely visual) */
+[tileWifi,tileBt,tileAirplane].forEach(tile=>{
+  tile.addEventListener("click",()=>{
+    tile.classList.toggle("active");
+  });
 });
 
 volSlider.addEventListener("input", ()=>{
@@ -907,7 +1070,7 @@ volSlider.addEventListener("input", ()=>{
 });
 
 /* ---------- App Store logic ---------- */
-const installedApps = new Set(); // store-installed apps only
+const installedApps = new Set();
 
 function addDesktopIcon(appId){
   const meta = appMeta[appId];
@@ -993,8 +1156,6 @@ function startPaint(canvas){
 }
 
 /* ---------- Games ---------- */
-
-/* Snake */
 function startSnake(canvas){
   const ctx = canvas.getContext("2d");
   const grid = 15;
@@ -1048,7 +1209,6 @@ function startSnake(canvas){
   setInterval(step,100);
 }
 
-/* Tetris */
 function startTetris(canvas){
   const ctx = canvas.getContext("2d");
   const cols=10, rows=18, size=20;
@@ -1164,7 +1324,6 @@ function startTetris(canvas){
   setInterval(function(){tick();draw();},200);
 }
 
-/* Pong */
 function startPong(canvas){
   const ctx=canvas.getContext("2d");
   let bx=150,by=100,dx=3,dy=3,py=80,ai=80;
@@ -1189,7 +1348,6 @@ function startPong(canvas){
   loop();
 }
 
-/* Flappy Bird */
 function startFlappy(canvas){
   const ctx=canvas.getContext("2d");
   let y=150,vy=0;
@@ -1222,7 +1380,6 @@ function startFlappy(canvas){
   loop();
 }
 
-/* Minesweeper */
 function startMines(canvas){
   const ctx=canvas.getContext("2d");
   const size=10, cell=30, bombsCount=15;
@@ -1310,7 +1467,6 @@ function startMines(canvas){
   draw();
 }
 
-/* 2048 */
 function start2048(canvas){
   const ctx=canvas.getContext("2d");
   const size=4;
