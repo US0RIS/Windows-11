@@ -7,12 +7,15 @@
 <style>
 html,body{
   margin:0;padding:0;width:100%;height:100%;overflow:hidden;
-  background:#0b1120;color:#e5e7eb;
-  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:#020617;color:#e5e7eb;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
 }
 #desktop{
   position:absolute;inset:0;
-  background:#111827;
+  background:
+    radial-gradient(circle at 20% 20%, #1d4ed8 0, transparent 45%),
+    radial-gradient(circle at 80% 80%, #a855f7 0, transparent 50%),
+    #020617;
 }
 
 /* Desktop icons */
@@ -27,29 +30,31 @@ html,body{
   width:48px;
   height:48px;
   margin:0 auto 4px;
-  border-radius:12px;
+  border-radius:14px;
   background:#1d4ed8;
   display:flex;
   align-items:center;
   justify-content:center;
   font-size:26px;
-  box-shadow:0 3px 6px rgba(0,0,0,0.5);
+  box-shadow:0 6px 18px rgba(0,0,0,0.55);
 }
 .icon-label{
   font-size:12px;
+  text-shadow:0 1px 2px rgba(0,0,0,0.7);
 }
 
 /* Taskbar */
 #taskbar{
   position:absolute;
   left:0;right:0;bottom:0;
-  height:48px;
-  background:rgba(15,23,42,0.96);
-  border-top:1px solid rgba(148,163,184,0.35);
+  height:52px;
+  background:rgba(15,23,42,0.78);
+  border-top:1px solid rgba(148,163,184,0.45);
   display:flex;
   align-items:center;
   padding:0 8px;
   z-index:200;
+  backdrop-filter:blur(18px);
 }
 #taskbar-left,
 #taskbar-center,
@@ -65,15 +70,15 @@ html,body{
 #taskbar-left{gap:6px;}
 #taskbar-right{
   gap:10px;
-  min-width:160px;
+  min-width:190px;
   justify-content:flex-end;
 }
 
 /* Start button */
 .start-btn{
-  width:36px;
-  height:36px;
-  border-radius:10px;
+  width:38px;
+  height:38px;
+  border-radius:11px;
   border:none;
   background:#1d4ed8;
   color:#f9fafb;
@@ -81,15 +86,17 @@ html,body{
   align-items:center;
   justify-content:center;
   cursor:pointer;
-  box-shadow:0 2px 4px rgba(0,0,0,0.4);
+  box-shadow:0 3px 8px rgba(0,0,0,0.6);
   font-size:20px;
 }
-.start-btn:hover{background:#2563eb;}
+.start-btn:hover{
+  background:#2563eb;
+}
 
 /* Task buttons */
 .task-button{
-  padding:4px 10px;
-  border-radius:8px;
+  padding:5px 12px;
+  border-radius:10px;
   border:none;
   background:rgba(148,163,184,0.3);
   color:#e5e7eb;
@@ -98,7 +105,7 @@ html,body{
   white-space:nowrap;
 }
 .task-button.active{
-  background:rgba(59,130,246,0.85);
+  background:rgba(59,130,246,0.9);
 }
 
 /* Tray icons */
@@ -115,65 +122,82 @@ html,body{
   height:100%;
   fill:#e5e7eb;
 }
-.timebox{font-size:11px;line-height:1.2;text-align:right;}
+.timebox{
+  font-size:11px;
+  line-height:1.2;
+  text-align:right;
+}
 
 /* Windows */
 .win{
   position:absolute;
-  width:480px;
-  height:360px;
+  width:520px;
+  height:380px;
   background:#020617;
-  border-radius:12px;
+  border-radius:14px;
   border:1px solid rgba(148,163,184,0.6);
-  box-shadow:0 18px 40px rgba(0,0,0,0.7);
+  box-shadow:0 22px 55px rgba(0,0,0,0.8);
   display:flex;
   flex-direction:column;
   z-index:100;
 }
 .whead{
-  height:32px;
+  height:34px;
   display:flex;
   align-items:center;
-  padding:0 8px;
-  background:linear-gradient(90deg,rgba(148,163,184,0.4),rgba(15,23,42,0.9));
+  padding:0 10px;
+  background:linear-gradient(90deg,rgba(148,163,184,0.45),rgba(15,23,42,0.95));
   cursor:move;
 }
-.wtitle{flex:1;font-size:13px;}
-.win-controls{display:flex;gap:4px;}
+.wtitle{
+  flex:1;
+  font-size:13px;
+}
+.win-controls{
+  display:flex;
+  gap:4px;
+}
 .win-btn{
-  width:24px;height:22px;
-  border-radius:5px;
+  width:26px;
+  height:22px;
+  border-radius:6px;
   border:none;
   background:transparent;
   color:#e5e7eb;
   cursor:pointer;
   font-size:13px;
 }
-.win-btn:hover{background:rgba(148,163,184,0.4);}
-.win-btn.close:hover{background:#dc2626;}
+.win-btn:hover{
+  background:rgba(148,163,184,0.4);
+}
+.win-btn.close:hover{
+  background:#dc2626;
+}
 .wbody{
   flex:1;
-  padding:8px;
+  padding:10px;
   overflow:auto;
   font-size:13px;
 }
 
 /* App content */
 iframe{
-  width:100%;height:100%;border:none;border-radius:8px;
+  width:100%;height:100%;
+  border:none;border-radius:10px;
+  background:#020617;
 }
 textarea{
   width:100%;height:100%;
-  background:#020617;border:none;border-radius:8px;
+  background:#020617;border:none;border-radius:10px;
   color:#e5e7eb;
   font-family:Consolas,monospace;
   font-size:13px;
-  padding:6px;
+  padding:8px;
   box-sizing:border-box;
 }
 canvas{
   background:#020617;
-  border-radius:8px;
+  border-radius:10px;
   display:block;
   margin:0 auto;
 }
@@ -181,26 +205,45 @@ canvas{
 /* Start menu */
 #start-menu{
   position:absolute;
-  bottom:56px;
+  bottom:64px;
   left:50%;
   transform:translateX(-50%);
-  width:500px;
-  max-width:90vw;
-  height:420px;
-  background:rgba(15,23,42,0.98);
-  border-radius:18px;
-  border:1px solid rgba(148,163,184,0.5);
-  box-shadow:0 20px 50px rgba(0,0,0,0.8);
-  padding:16px 18px;
+  width:520px;
+  max-width:95vw;
+  height:430px;
+  background:rgba(15,23,42,0.96);
+  border-radius:22px;
+  border:1px solid rgba(148,163,184,0.55);
+  box-shadow:0 24px 70px rgba(0,0,0,0.9);
+  padding:18px 20px 12px;
   box-sizing:border-box;
   display:none;
   z-index:250;
-  backdrop-filter:blur(18px);
+  backdrop-filter:blur(20px);
+}
+#start-top-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:8px;
+  font-size:12px;
+  color:#9ca3af;
+}
+#start-user{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+#start-user-avatar{
+  width:26px;
+  height:26px;
+  border-radius:999px;
+  background:linear-gradient(135deg,#38bdf8,#a855f7);
 }
 #start-pinned-title{
   font-size:12px;
   color:#9ca3af;
-  margin-bottom:8px;
+  margin:8px 0;
 }
 #start-grid{
   display:grid;
@@ -208,7 +251,7 @@ canvas{
   gap:10px;
 }
 .start-tile{
-  height:72px;
+  height:76px;
   border-radius:12px;
   background:#111827;
   display:flex;
@@ -222,8 +265,8 @@ canvas{
   background:#1f2937;
 }
 .start-tile-icon{
-  width:28px;height:28px;
-  border-radius:8px;
+  width:30px;height:30px;
+  border-radius:9px;
   background:#1d4ed8;
   display:flex;
   align-items:center;
@@ -234,7 +277,7 @@ canvas{
 #start-search{
   width:100%;
   margin-top:14px;
-  padding:6px 10px;
+  padding:7px 10px;
   border-radius:8px;
   border:1px solid #374151;
   background:#020617;
@@ -246,18 +289,18 @@ canvas{
 /* Quick settings panel */
 #quick-panel{
   position:absolute;
-  bottom:56px;
+  bottom:64px;
   right:12px;
   width:320px;
-  background:rgba(15,23,42,0.98);
-  border-radius:16px;
-  border:1px solid rgba(148,163,184,0.5);
-  box-shadow:0 20px 50px rgba(0,0,0,0.8);
+  background:rgba(15,23,42,0.96);
+  border-radius:18px;
+  border:1px solid rgba(148,163,184,0.55);
+  box-shadow:0 24px 70px rgba(0,0,0,0.9);
   padding:12px 14px;
   box-sizing:border-box;
   display:none;
   z-index:260;
-  backdrop-filter:blur(18px);
+  backdrop-filter:blur(20px);
   font-size:12px;
 }
 .q-row{
@@ -282,6 +325,104 @@ canvas{
 }
 .q-slider{
   width:100%;
+}
+
+/* Store app styles */
+.store-layout{
+  display:flex;
+  height:100%;
+  gap:10px;
+}
+.store-sidebar{
+  width:120px;
+  border-radius:12px;
+  background:#020617;
+  padding:8px;
+  box-sizing:border-box;
+  font-size:12px;
+}
+.store-sidebar-title{
+  font-weight:600;
+  margin-bottom:6px;
+}
+.store-sidebar-item{
+  padding:4px 6px;
+  border-radius:8px;
+  cursor:pointer;
+}
+.store-sidebar-item.active,
+.store-sidebar-item:hover{
+  background:#1f2937;
+}
+.store-main{
+  flex:1;
+  border-radius:12px;
+  background:#020617;
+  padding:8px 10px;
+  box-sizing:border-box;
+}
+.store-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:8px;
+}
+.store-search{
+  flex:1;
+  margin-left:8px;
+  padding:5px 8px;
+  border-radius:8px;
+  border:1px solid #374151;
+  background:#020617;
+  color:#e5e7eb;
+  font-size:12px;
+}
+.store-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+  gap:8px;
+}
+.store-card{
+  border-radius:12px;
+  background:#0b1120;
+  padding:8px;
+  font-size:12px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.store-card-top{
+  display:flex;
+  gap:8px;
+}
+.store-card-icon{
+  width:32px;height:32px;
+  border-radius:10px;
+  background:#1d4ed8;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+}
+.store-card-title{
+  font-weight:600;
+}
+.store-card-desc{
+  color:#9ca3af;
+  font-size:11px;
+}
+.store-card-btn{
+  align-self:flex-start;
+  padding:4px 10px;
+  border-radius:999px;
+  border:none;
+  cursor:pointer;
+  background:#1d4ed8;
+  color:#f9fafb;
+  font-size:11px;
+}
+.store-card-btn.installed{
+  background:#16a34a;
 }
 </style>
 </head>
@@ -318,14 +459,24 @@ canvas{
   <div class="icon" style="top:520px;left:140px" data-app="g2048">
     <div class="icon-inner">🔢</div><div class="icon-label">2048</div>
   </div>
+
+  <!-- Store icon column -->
+  <div class="icon" style="top:20px;left:260px" data-app="store">
+    <div class="icon-inner">🛍️</div><div class="icon-label">Store</div>
+  </div>
 </div>
 
 <!-- Start menu -->
 <div id="start-menu">
-  <div id="start-pinned-title">Pinned</div>
-  <div id="start-grid">
-    <!-- tiles created in JS -->
+  <div id="start-top-row">
+    <div>Start</div>
+    <div id="start-user">
+      <div id="start-user-avatar"></div>
+      <div>Guest</div>
+    </div>
   </div>
+  <div id="start-pinned-title">Pinned</div>
+  <div id="start-grid"></div>
   <input id="start-search" placeholder="Type to search (fake)" />
 </div>
 
@@ -352,7 +503,7 @@ canvas{
   </div>
   <div id="taskbar-center"></div>
   <div id="taskbar-right">
-    <!-- Wi-Fi (Windows-ish) -->
+    <!-- Wi-Fi -->
     <div id="wifi-icon" class="tray-icon" title="Wi-Fi">
       <svg viewBox="0 0 24 24">
         <path d="M12 18.5c-.7 0-1.3.3-1.8.7l1.8 2.3 1.8-2.3c-.5-.4-1.1-.7-1.8-.7z"/>
@@ -389,6 +540,25 @@ canvas{
 <script>
 let zCounter = 100;
 const windowsMap = new Map();
+const desktop = document.getElementById("desktop");
+let dynamicIconCount = 1; // store occupies first dynamic column slot
+
+/* App metadata for Start menu + Store + dynamic icons */
+const appMeta = {
+  browser:{label:"Browser",icon:"🌐"},
+  notes:{label:"Notes",icon:"📝"},
+  files:{label:"Files",icon:"🗂️"},
+  snake:{label:"Snake",icon:"🐍"},
+  tetris:{label:"Tetris",icon:"🧱"},
+  pong:{label:"Pong",icon:"🏓"},
+  flappy:{label:"Flappy",icon:"🐤"},
+  mines:{label:"Mines",icon:"💣"},
+  g2048:{label:"2048",icon:"🔢"},
+  store:{label:"Store",icon:"🛍️"},
+  paint:{label:"Paint",icon:"🎨"},
+  music:{label:"Music",icon:"🎵"},
+  weather:{label:"Weather",icon:"☀️"}
+};
 
 /* ---------- Clock ---------- */
 function updateClock(){
@@ -401,10 +571,10 @@ function updateClock(){
 updateClock();
 setInterval(updateClock, 1000);
 
-/* ---------- Desktop icon dragging & launching ---------- */
+/* ---------- Desktop icons: drag + open ---------- */
 let dragIcon = null, dragOffsetX = 0, dragOffsetY = 0;
 
-document.querySelectorAll(".icon").forEach(icon=>{
+function setupIcon(icon){
   icon.addEventListener("mousedown", e=>{
     dragIcon = icon;
     dragOffsetX = e.clientX - icon.offsetLeft;
@@ -415,7 +585,8 @@ document.querySelectorAll(".icon").forEach(icon=>{
     const appId = icon.getAttribute("data-app");
     openApp(appId);
   });
-});
+}
+document.querySelectorAll(".icon").forEach(setupIcon);
 
 document.addEventListener("mousemove", e=>{
   if(!dragIcon) return;
@@ -457,8 +628,8 @@ function addTaskButton(appId, title){
     const info = windowsMap.get(appId);
     if(!info) return;
     const w = info.window;
-    w.style.display = "flex";       // always show
-    bringToFront(w);                // and focus
+    w.style.display = "flex";
+    bringToFront(w);
     btn.classList.add("active");
   });
   taskbarCenter.appendChild(btn);
@@ -477,6 +648,7 @@ function openApp(appId){
     return;
   }
 
+  const meta = appMeta[appId] || {label:appId};
   const win = document.createElement("div");
   win.className = "win";
   win.style.left = "220px";
@@ -494,11 +666,10 @@ function openApp(appId){
 
   const body = win.querySelector(".wbody");
   const titleEl = win.querySelector(".wtitle");
-  let title = appId;
+  let title = meta.label;
 
   /* App content */
   if(appId==="browser"){
-    title = "Browser";
     body.innerHTML =
       "<input type='text' id='url-input' placeholder='Search or type URL' " +
       "style='width:100%;padding:6px;border-radius:8px;border:1px solid #4b5563;" +
@@ -522,40 +693,69 @@ function openApp(appId){
           "<div style='text-align:center;'>" +
           "<div style='font-size:18px;margin-bottom:6px;'>Opened in real browser:</div>" +
           "<div style='font-size:12px;color:#38bdf8;word-wrap:break-word;'>" +
-          v.replace(/</g,"&lt;") +
+          v.replace(/</g,\"&lt;\") +
           "</div></div></div>";
       }
     });
   }else if(appId==="notes"){
-    title = "Notepad";
     body.innerHTML = "<textarea spellcheck='false'>Type here...</textarea>";
   }else if(appId==="files"){
-    title = "File Explorer";
     body.innerHTML = "<p>Drop files onto the desktop to open them. They will be listed here as well.</p><ul id='file-list'></ul>";
   }else if(appId==="snake"){
-    title = "Snake";
     body.innerHTML = "<canvas id='snake-canvas' width='300' height='300'></canvas>";
     startSnake(body.querySelector("#snake-canvas"));
   }else if(appId==="tetris"){
-    title = "Tetris";
-    body.innerHTML = "<canvas id='tetris-canvas' width='200' height='360'></canvas>";
+    body.innerHTML = "<canvas id='tetris-canvas' width='220' height='380'></canvas>";
     startTetris(body.querySelector("#tetris-canvas"));
   }else if(appId==="pong"){
-    title = "Pong";
-    body.innerHTML = "<canvas id='pong-canvas' width='300' height='200'></canvas>";
+    body.innerHTML = "<canvas id='pong-canvas' width='320' height='200'></canvas>";
     startPong(body.querySelector("#pong-canvas"));
   }else if(appId==="flappy"){
-    title = "Flappy Bird";
-    body.innerHTML = "<canvas id='flappy-canvas' width='300' height='400'></canvas>";
+    body.innerHTML = "<canvas id='flappy-canvas' width='320' height='400'></canvas>";
     startFlappy(body.querySelector("#flappy-canvas"));
   }else if(appId==="mines"){
-    title = "Minesweeper";
-    body.innerHTML = "<canvas id='mines-canvas' width='300' height='300'></canvas>";
+    body.innerHTML = "<canvas id='mines-canvas' width='320' height='320'></canvas>";
     startMines(body.querySelector("#mines-canvas"));
   }else if(appId==="g2048"){
-    title = "2048";
-    body.innerHTML = "<canvas id='game2048-canvas' width='300' height='300'></canvas>";
+    body.innerHTML = "<canvas id='game2048-canvas' width='320' height='320'></canvas>";
     start2048(body.querySelector("#game2048-canvas"));
+  }else if(appId==="store"){
+    title = "Windows Store";
+    body.innerHTML = `
+      <div class="store-layout">
+        <div class="store-sidebar">
+          <div class="store-sidebar-title">Store</div>
+          <div class="store-sidebar-item active">Home</div>
+          <div class="store-sidebar-item">Games</div>
+          <div class="store-sidebar-item">Productivity</div>
+        </div>
+        <div class="store-main">
+          <div class="store-header">
+            <div>Featured apps</div>
+            <input class="store-search" placeholder="Search (fake)" />
+          </div>
+          <div class="store-grid" id="store-grid"></div>
+        </div>
+      </div>`;
+    buildStoreApps(body.querySelector("#store-grid"));
+  }else if(appId==="paint"){
+    body.innerHTML = "<p>Simple Paint (drag to draw)</p><canvas id='paint-canvas' width='420' height='260'></canvas>";
+    startPaint(body.querySelector("#paint-canvas"));
+  }else if(appId==="music"){
+    body.innerHTML = `
+      <p>Music Player (fake)</p>
+      <ul>
+        <li>♫ Chill Beats – Playing</li>
+        <li>♫ Focus Mode</li>
+        <li>♫ Retro Game OST</li>
+      </ul>
+      <p style="font-size:11px;color:#9ca3af;margin-top:8px;">This is just a mock player for fun.</p>`;
+  }else if(appId==="weather"){
+    body.innerHTML = `
+      <p>Weather</p>
+      <p style="font-size:40px;margin:10px 0;">72°☀️</p>
+      <p>Clear skies in Your City.</p>
+      <p style="font-size:11px;color:#9ca3af;margin-top:8px;">Data is static – this is a mock weather app.</p>`;
   }
 
   titleEl.textContent = title;
@@ -573,7 +773,6 @@ function openApp(appId){
 }
 
 /* ---------- Drag & drop files (wallpaper / open) ---------- */
-const desktop = document.getElementById("desktop");
 document.addEventListener("dragover", function(e){ e.preventDefault(); });
 document.addEventListener("drop", function(e){
   e.preventDefault();
@@ -649,20 +848,47 @@ const batteryIcon = document.getElementById("battery-icon");
 const wifiToggle = document.getElementById("wifi-toggle");
 const volSlider = document.getElementById("vol-slider");
 const batteryStatus = document.getElementById("battery-status");
+const startGrid = document.getElementById("start-grid");
+
+const pinnedApps = new Set([
+  "browser","notes","files",
+  "snake","tetris","pong","flappy","mines","g2048","store"
+]);
+
+function buildStartMenu(){
+  startGrid.innerHTML="";
+  pinnedApps.forEach(id=>{
+    const meta = appMeta[id];
+    if(!meta) return;
+    const d=document.createElement("div");
+    d.className="start-tile";
+    d.innerHTML =
+      "<div class='start-tile-icon'>"+meta.icon+"</div>" +
+      "<div>"+meta.label+"</div>";
+    d.addEventListener("click", ()=>{
+      openApp(id);
+      startMenu.style.display="none";
+    });
+    startGrid.appendChild(d);
+  });
+}
+buildStartMenu();
+
+function addStartTile(appId){
+  if(pinnedApps.has(appId)) return;
+  pinnedApps.add(appId);
+  buildStartMenu();
+}
 
 function toggleStartMenu(){
   const isVisible = startMenu.style.display==="block";
   startMenu.style.display = isVisible ? "none" : "block";
-  if(!isVisible){
-    quickPanel.style.display="none";
-  }
+  if(!isVisible) quickPanel.style.display="none";
 }
 function toggleQuickPanel(){
   const isVisible = quickPanel.style.display==="block";
   quickPanel.style.display = isVisible ? "none" : "block";
-  if(!isVisible){
-    startMenu.style.display="none";
-  }
+  if(!isVisible) startMenu.style.display="none";
 }
 
 startButton.addEventListener("click", toggleStartMenu);
@@ -680,31 +906,91 @@ volSlider.addEventListener("input", ()=>{
   batteryStatus.textContent = "100% • Volume " + v + "%";
 });
 
-/* Build Start menu tiles */
-const startTiles = [
-  {app:"browser", label:"Browser", icon:"🌐"},
-  {app:"notes", label:"Notes", icon:"📝"},
-  {app:"files", label:"Files", icon:"🗂️"},
-  {app:"snake", label:"Snake", icon:"🐍"},
-  {app:"tetris", label:"Tetris", icon:"🧱"},
-  {app:"pong", label:"Pong", icon:"🏓"},
-  {app:"flappy", label:"Flappy", icon:"🐤"},
-  {app:"mines", label:"Mines", icon:"💣"},
-  {app:"g2048", label:"2048", icon:"🔢"}
-];
-const startGrid = document.getElementById("start-grid");
-startTiles.forEach(t=>{
-  const d=document.createElement("div");
-  d.className="start-tile";
-  d.innerHTML =
-    "<div class='start-tile-icon'>"+t.icon+"</div>" +
-    "<div>"+t.label+"</div>";
-  d.addEventListener("click", ()=>{
-    openApp(t.app);
-    startMenu.style.display="none";
+/* ---------- App Store logic ---------- */
+const installedApps = new Set(); // for store-installed apps only
+
+function addDesktopIcon(appId){
+  const meta = appMeta[appId];
+  if(!meta) return;
+  const icon = document.createElement("div");
+  icon.className="icon";
+  icon.style.top = (20 + dynamicIconCount*90) + "px";
+  icon.style.left = "260px";
+  icon.setAttribute("data-app", appId);
+  icon.innerHTML =
+    "<div class='icon-inner'>"+meta.icon+"</div>" +
+    "<div class='icon-label'>"+meta.label+"</div>";
+  desktop.appendChild(icon);
+  setupIcon(icon);
+  dynamicIconCount++;
+}
+
+function installApp(appId){
+  if(installedApps.has(appId)) return;
+  installedApps.add(appId);
+  addDesktopIcon(appId);
+  addStartTile(appId);
+}
+
+function buildStoreApps(container){
+  const storeApps = [
+    {id:"paint", desc:"Draw simple shapes and doodles."},
+    {id:"music", desc:"Listen to a fake chill playlist."},
+    {id:"weather", desc:"Check a pretend sunny forecast."},
+    {id:"snake", desc:"Classic snake game."},
+    {id:"tetris", desc:"Falling block puzzle."},
+    {id:"g2048", desc:"Merge tiles to 2048."}
+  ];
+  container.innerHTML="";
+  storeApps.forEach(app=>{
+    const meta = appMeta[app.id];
+    const card = document.createElement("div");
+    card.className="store-card";
+    card.innerHTML = `
+      <div class="store-card-top">
+        <div class="store-card-icon">${meta.icon}</div>
+        <div>
+          <div class="store-card-title">${meta.label}</div>
+          <div class="store-card-desc">${app.desc}</div>
+        </div>
+      </div>
+      <button class="store-card-btn" data-install="${app.id}">Install</button>
+    `;
+    const btn = card.querySelector("[data-install]");
+    btn.addEventListener("click", ()=>{
+      if(!installedApps.has(app.id)){
+        installApp(app.id);
+        btn.textContent="Open";
+        btn.classList.add("installed");
+      }else{
+        openApp(app.id);
+      }
+    });
+    container.appendChild(card);
   });
-  startGrid.appendChild(d);
-});
+}
+
+/* ---------- Extra mini app (Paint) ---------- */
+function startPaint(canvas){
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle="#020617";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  let drawing=false;
+  canvas.addEventListener("mousedown",e=>{
+    drawing=true;
+    ctx.strokeStyle="#38bdf8";
+    ctx.lineWidth=3;
+    ctx.lineCap="round";
+    ctx.beginPath();
+    ctx.moveTo(e.offsetX,e.offsetY);
+  });
+  canvas.addEventListener("mousemove",e=>{
+    if(!drawing) return;
+    ctx.lineTo(e.offsetX,e.offsetY);
+    ctx.stroke();
+  });
+  document.addEventListener("mouseup",()=>{drawing=false;});
+}
 
 /* ---------- Games ---------- */
 
@@ -936,7 +1222,7 @@ function startFlappy(canvas){
   loop();
 }
 
-/* Minesweeper (simple playable) */
+/* Minesweeper */
 function startMines(canvas){
   const ctx=canvas.getContext("2d");
   const size=10, cell=30, bombsCount=15;
