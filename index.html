@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Windows 11 Emulator – GitHub Ready</title>
+<title>Windows 11 Emulator – GitHub Ready Fixed</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
 html,body{
@@ -102,7 +102,12 @@ html,body{
 
 /* Tray icons */
 .tray-icon{
-  width:20px;height:20px;opacity:0.9;
+  width:20px;
+  height:20px;
+  font-size:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 .timebox{font-size:11px;line-height:1.2;text-align:right;}
 
@@ -210,9 +215,9 @@ canvas{
   </div>
   <div id="taskbar-center"></div>
   <div id="taskbar-right">
-    <img class="tray-icon" alt="wifi" src="https://upload.wikimedia.org/wikipedia/commons/6/6b/Windows_11_WiFi_icon.svg">
-    <img class="tray-icon" alt="sound" src="https://upload.wikimedia.org/wikipedia/commons/0/07/Windows_11_Sound_icon.svg">
-    <img class="tray-icon" alt="battery" src="https://upload.wikimedia.org/wikipedia/commons/0/02/Windows_11_Battery_icon.svg">
+    <div class="tray-icon" title="Wi-Fi">📶</div>
+    <div class="tray-icon" title="Volume">🔊</div>
+    <div class="tray-icon" title="Battery">🔋</div>
     <div class="timebox">
       <div id="clock-time"></div>
       <div id="clock-date"></div>
@@ -227,10 +232,10 @@ const windowsMap = new Map();
 /* ---------- Clock ---------- */
 function updateClock(){
   const now = new Date();
-  const timeEl = document.getElementById("clock-time");
-  const dateEl = document.getElementById("clock-date");
-  timeEl.textContent = now.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
-  dateEl.textContent = now.toLocaleDateString([], {month:"short", day:"numeric"});
+  document.getElementById("clock-time").textContent =
+    now.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
+  document.getElementById("clock-date").textContent =
+    now.toLocaleDateString([], {month:"short", day:"numeric"});
 }
 updateClock();
 setInterval(updateClock, 1000);
@@ -291,14 +296,9 @@ function addTaskButton(appId, title){
     const info = windowsMap.get(appId);
     if(!info) return;
     const w = info.window;
-    if(w.style.display==="none"){
-      w.style.display="flex";
-      btn.classList.add("active");
-      bringToFront(w);
-    }else{
-      w.style.display="none";
-      btn.classList.remove("active");
-    }
+    w.style.display = "flex";       // always show
+    bringToFront(w);                // and focus
+    btn.classList.add("active");
   });
   taskbarCenter.appendChild(btn);
   return btn;
@@ -310,7 +310,7 @@ function openApp(appId){
   if(windowsMap.has(appId)){
     const info = windowsMap.get(appId);
     const w = info.window;
-    w.style.display="flex";
+    w.style.display = "flex";
     bringToFront(w);
     info.taskButton.classList.add("active");
     return;
@@ -465,7 +465,6 @@ document.addEventListener("drop", function(e){
     reader.readAsText(file);
   }else{
     reader.readAsArrayBuffer(file);
-    // non-text files just go to File Explorer list
     openApp("files");
     const info = windowsMap.get("files");
     if(info){
