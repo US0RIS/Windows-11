@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Windows 11 Emulator – GitHub Ready</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+html,body{
+  margin:0;padding:0;width:100%;height:100%;overflow:hidden;
+  background:#0b1120;color:#e5e7eb;
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+#desktop{
+  position:absolute;inset:0;
+  background:#111827;
+}
+/* Desktop icons */
+.icon{
+  position:absolute;
+  width:80px;
+  text-align:center;
+  cursor:pointer;
+  user-select:none;
+}
+.icon-inner{
+  width:48px;
+  height:48px;
+  margin:0 auto 4px;
+  border-radius:12px;
+  background:#1d4ed8;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:26px;
+  box-shadow:0 3px 6px rgba(0,0,0,0.5);
+}
+.icon-label{
+  font-size:12px;
+}
+
+/* Taskbar */
+#taskbar{
+  position:absolute;
+  left:0;right:0;bottom:0;
+  height:48px;
+  background:rgba(15,23,42,0.96);
+  border-top:1px solid rgba(148,163,184,0.35);
+  display:flex;
+  align-items:center;
+  padding:0 8px;
+  z-index:200;
+}
+#taskbar-left,
+#taskbar-center,
+#taskbar-right{
+  display:flex;
+  align-items:center;
+}
+#taskbar-center{
+  flex:1;
+  justify-content:center;
+  gap:6px;
+}
+#taskbar-left{gap:6px;}
+#taskbar-right{
+  gap:10px;
+  min-width:140px;
+  justify-content:flex-end;
+}
+
+/* Start button */
+.start-btn{
+  width:36px;
+  height:36px;
+  border-radius:10px;
+  border:none;
+  background:#1d4ed8;
+  color:#f9fafb;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  box-shadow:0 2px 4px rgba(0,0,0,0.4);
+  font-size:20px;
+}
+.start-btn:hover{background:#2563eb;}
+
+/* Task buttons */
+.task-button{
+  padding:4px 10px;
+  border-radius:8px;
+  border:none;
+  background:rgba(148,163,184,0.3);
+  color:#e5e7eb;
+  font-size:12px;
+  cursor:pointer;
+  white-space:nowrap;
+}
+.task-button.active{
+  background:rgba(59,130,246,0.85);
+}
+
+/* Tray icons */
+.tray-icon{
+  width:20px;height:20px;opacity:0.9;
+}
+.timebox{font-size:11px;line-height:1.2;text-align:right;}
+
+/* Windows */
+.win{
+  position:absolute;
+  width:480px;
+  height:360px;
+  background:#020617;
+  border-radius:12px;
+  border:1px solid rgba(148,163,184,0.6);
+  box-shadow:0 18px 40px rgba(0,0,0,0.7);
+  display:flex;
+  flex-direction:column;
+  z-index:100;
+}
+.whead{
+  height:32px;
+  display:flex;
+  align-items:center;
+  padding:0 8px;
+  background:linear-gradient(90deg,rgba(148,163,184,0.4),rgba(15,23,42,0.9));
+  cursor:move;
+}
+.wtitle{flex:1;font-size:13px;}
+.win-controls{display:flex;gap:4px;}
+.win-btn{
+  width:24px;height:22px;
+  border-radius:5px;
+  border:none;
+  background:transparent;
+  color:#e5e7eb;
+  cursor:pointer;
+  font-size:13px;
+}
+.win-btn:hover{background:rgba(148,163,184,0.4);}
+.win-btn.close:hover{background:#dc2626;}
+.wbody{
+  flex:1;
+  padding:8px;
+  overflow:auto;
+  font-size:13px;
+}
+
+/* App content */
+iframe{
+  width:100%;height:100%;border:none;border-radius:8px;
+}
+textarea{
+  width:100%;height:100%;
+  background:#020617;border:none;border-radius:8px;
+  color:#e5e7eb;
+  font-family:Consolas,monospace;
+  font-size:13px;
+  padding:6px;
+  box-sizing:border-box;
+}
+canvas{
+  background:#020617;
+  border-radius:8px;
+  display:block;
+  margin:0 auto;
+}
+</style>
+</head>
+<body>
+
+<div id="desktop">
+  <!-- System apps -->
+  <div class="icon" style="top:20px;left:20px" data-app="browser">
+    <div class="icon-inner">🌐</div><div class="icon-label">Browser</div>
+  </div>
+  <div class="icon" style="top:120px;left:20px" data-app="notes">
+    <div class="icon-inner">📝</div><div class="icon-label">Notes</div>
+  </div>
+  <div class="icon" style="top:220px;left:20px" data-app="files">
+    <div class="icon-inner">🗂️</div><div class="icon-label">Files</div>
+  </div>
+
+  <!-- Games -->
+  <div class="icon" style="top:20px;left:140px" data-app="snake">
+    <div class="icon-inner">🐍</div><div class="icon-label">Snake</div>
+  </div>
+  <div class="icon" style="top:120px;left:140px" data-app="tetris">
+    <div class="icon-inner">🧱</div><div class="icon-label">Tetris</div>
+  </div>
+  <div class="icon" style="top:220px;left:140px" data-app="pong">
+    <div class="icon-inner">🏓</div><div class="icon-label">Pong</div>
+  </div>
+  <div class="icon" style="top:320px;left:140px" data-app="flappy">
+    <div class="icon-inner">🐤</div><div class="icon-label">Flappy</div>
+  </div>
+  <div class="icon" style="top:420px;left:140px" data-app="mines">
+    <div class="icon-inner">💣</div><div class="icon-label">Mines</div>
+  </div>
+  <div class="icon" style="top:520px;left:140px" data-app="g2048">
+    <div class="icon-inner">🔢</div><div class="icon-label">2048</div>
+  </div>
+</div>
+
+<!-- Taskbar -->
+<div id="taskbar">
+  <div id="taskbar-left">
+    <button class="start-btn" title="Start">⊞</button>
+  </div>
+  <div id="taskbar-center"></div>
+  <div id="taskbar-right">
+    <img class="tray-icon" alt="wifi" src="https://upload.wikimedia.org/wikipedia/commons/6/6b/Windows_11_WiFi_icon.svg">
+    <img class="tray-icon" alt="sound" src="https://upload.wikimedia.org/wikipedia/commons/0/07/Windows_11_Sound_icon.svg">
+    <img class="tray-icon" alt="battery" src="https://upload.wikimedia.org/wikipedia/commons/0/02/Windows_11_Battery_icon.svg">
+    <div class="timebox">
+      <div id="clock-time"></div>
+      <div id="clock-date"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+let zCounter = 100;
+const windowsMap = new Map();
+
+/* ---------- Clock ---------- */
+function updateClock(){
+  const now = new Date();
+  const timeEl = document.getElementById("clock-time");
+  const dateEl = document.getElementById("clock-date");
+  timeEl.textContent = now.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
+  dateEl.textContent = now.toLocaleDateString([], {month:"short", day:"numeric"});
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+/* ---------- Desktop icon dragging & launching ---------- */
+let dragIcon = null, dragOffsetX = 0, dragOffsetY = 0;
+
+document.querySelectorAll(".icon").forEach(icon=>{
+  icon.addEventListener("mousedown", e=>{
+    dragIcon = icon;
+    dragOffsetX = e.clientX - icon.offsetLeft;
+    dragOffsetY = e.clientY - icon.offsetTop;
+  });
+  icon.addEventListener("mouseup", ()=>{ dragIcon=null; });
+  icon.addEventListener("dblclick", ()=>{
+    const appId = icon.getAttribute("data-app");
+    openApp(appId);
+  });
+});
+
+document.addEventListener("mousemove", e=>{
+  if(!dragIcon) return;
+  dragIcon.style.left = (e.clientX - dragOffsetX) + "px";
+  dragIcon.style.top  = (e.clientY - dragOffsetY) + "px";
+});
+document.addEventListener("mouseup", ()=>{ dragIcon=null; });
+
+/* ---------- Windows / Taskbar ---------- */
+const taskbarCenter = document.getElementById("taskbar-center");
+
+function bringToFront(win){
+  win.style.zIndex = ++zCounter;
+}
+function makeDraggable(win){
+  const header = win.querySelector(".whead");
+  let dragging=false, offX=0, offY=0;
+  header.addEventListener("mousedown", e=>{
+    if(e.target.closest(".win-controls")) return;
+    dragging=true;
+    const rect = win.getBoundingClientRect();
+    offX = e.clientX - rect.left;
+    offY = e.clientY - rect.top;
+    bringToFront(win);
+  });
+  document.addEventListener("mousemove", e=>{
+    if(!dragging) return;
+    win.style.left = (e.clientX - offX) + "px";
+    win.style.top  = (e.clientY - offY) + "px";
+  });
+  document.addEventListener("mouseup", ()=>{ dragging=false; });
+}
+
+function addTaskButton(appId, title){
+  const btn = document.createElement("button");
+  btn.className = "task-button active";
+  btn.textContent = title;
+  btn.addEventListener("click", ()=>{
+    const info = windowsMap.get(appId);
+    if(!info) return;
+    const w = info.window;
+    if(w.style.display==="none"){
+      w.style.display="flex";
+      btn.classList.add("active");
+      bringToFront(w);
+    }else{
+      w.style.display="none";
+      btn.classList.remove("active");
+    }
+  });
+  taskbarCenter.appendChild(btn);
+  return btn;
+}
+function removeTaskButton(btn){ btn.remove(); }
+
+/* ---------- Open App ---------- */
+function openApp(appId){
+  if(windowsMap.has(appId)){
+    const info = windowsMap.get(appId);
+    const w = info.window;
+    w.style.display="flex";
+    bringToFront(w);
+    info.taskButton.classList.add("active");
+    return;
+  }
+
+  const win = document.createElement("div");
+  win.className = "win";
+  win.style.left = "220px";
+  win.style.top  = "120px";
+  win.style.zIndex = ++zCounter;
+  win.innerHTML =
+    "<div class='whead'>" +
+      "<div class='wtitle'></div>" +
+      "<div class='win-controls'>" +
+        "<button class='win-btn close'>✕</button>" +
+      "</div>" +
+    "</div>" +
+    "<div class='wbody'></div>";
+  document.body.appendChild(win);
+
+  const body = win.querySelector(".wbody");
+  const titleEl = win.querySelector(".wtitle");
+  let title = appId;
+
+  /* App content */
+  if(appId==="browser"){
+    title = "Browser";
+    body.innerHTML =
+      "<input type='text' id='url-input' placeholder='Search or type URL' " +
+      "style='width:100%;padding:6px;border-radius:8px;border:1px solid #4b5563;" +
+      "background:#020617;color:#e5e7eb;box-sizing:border-box;margin-bottom:8px;font-size:13px'>" +
+      "<iframe></iframe>";
+    const input = body.querySelector("#url-input");
+    const iframe = body.querySelector("iframe");
+    input.addEventListener("keydown", function(e){
+      if(e.key==="Enter"){
+        var v = input.value.trim();
+        if(!v) return;
+        if(v.indexOf(".")===-1 && v.indexOf("http")==-1){
+          v = "https://duckduckgo.com/?q=" + encodeURIComponent(input.value);
+        }else if(v.indexOf("http")!==0){
+          v = "https://" + v;
+        }
+        window.open(v,"_blank");
+        iframe.srcdoc =
+          "<div style='display:flex;align-items:center;justify-content:center;height:100%;" +
+          "font-family:system-ui;color:white;background:#020617;'>" +
+          "<div style='text-align:center;'>" +
+          "<div style='font-size:18px;margin-bottom:6px;'>Opened in real browser:</div>" +
+          "<div style='font-size:12px;color:#38bdf8;word-wrap:break-word;'>" +
+          v.replace(/</g,"&lt;") +
+          "</div></div></div>";
+      }
+    });
+  }else if(appId==="notes"){
+    title = "Notepad";
+    body.innerHTML = "<textarea spellcheck='false'>Type here...</textarea>";
+  }else if(appId==="files"){
+    title = "File Explorer";
+    body.innerHTML = "<p>Drop files onto the desktop to open them. They will be listed here as well.</p><ul id='file-list'></ul>";
+  }else if(appId==="snake"){
+    title = "Snake";
+    body.innerHTML = "<canvas id='snake-canvas' width='300' height='300'></canvas>";
+    startSnake(body.querySelector("#snake-canvas"));
+  }else if(appId==="tetris"){
+    title = "Tetris";
+    body.innerHTML = "<canvas id='tetris-canvas' width='200' height='360'></canvas>";
+    startTetris(body.querySelector("#tetris-canvas"));
+  }else if(appId==="pong"){
+    title = "Pong";
+    body.innerHTML = "<canvas id='pong-canvas' width='300' height='200'></canvas>";
+    startPong(body.querySelector("#pong-canvas"));
+  }else if(appId==="flappy"){
+    title = "Flappy Bird";
+    body.innerHTML = "<canvas id='flappy-canvas' width='300' height='400'></canvas>";
+    startFlappy(body.querySelector("#flappy-canvas"));
+  }else if(appId==="mines"){
+    title = "Minesweeper";
+    body.innerHTML = "<canvas id='mines-canvas' width='300' height='300'></canvas>";
+    startMines(body.querySelector("#mines-canvas"));
+  }else if(appId==="g2048"){
+    title = "2048";
+    body.innerHTML = "<canvas id='game2048-canvas' width='300' height='300'></canvas>";
+    start2048(body.querySelector("#game2048-canvas"));
+  }
+
+  titleEl.textContent = title;
+  makeDraggable(win);
+  bringToFront(win);
+
+  const taskButton = addTaskButton(appId, title);
+  win.querySelector(".win-btn.close").addEventListener("click", ()=>{
+    win.remove();
+    removeTaskButton(taskButton);
+    windowsMap.delete(appId);
+  });
+
+  windowsMap.set(appId, {window:win, taskButton:taskButton});
+}
+
+/* ---------- Drag & drop files (wallpaper / open) ---------- */
+const desktop = document.getElementById("desktop");
+document.addEventListener("dragover", function(e){ e.preventDefault(); });
+document.addEventListener("drop", function(e){
+  e.preventDefault();
+  const files = e.dataTransfer.files;
+  if(!files || !files.length) return;
+  const file = files[0];
+  const name = file.name || "";
+  const lower = name.toLowerCase();
+  const ext = lower.split(".").pop();
+
+  if(["png","jpg","jpeg","gif","webp"].indexOf(ext)!==-1){
+    const url = URL.createObjectURL(file);
+    desktop.style.background = "url("+url+") center/cover no-repeat";
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(evt){
+    const text = evt.target.result;
+
+    if(ext==="txt"){
+      openApp("notes");
+      const info = windowsMap.get("notes");
+      if(info){
+        const ta = info.window.querySelector("textarea");
+        if(ta) ta.value = text;
+      }
+    }else if(ext==="html" || ext==="htm"){
+      openApp("browser");
+      const info = windowsMap.get("browser");
+      if(info){
+        const frame = info.window.querySelector("iframe");
+        const blob = new Blob([text], {type:"text/html"});
+        frame.src = URL.createObjectURL(blob);
+      }
+    }else{
+      openApp("files");
+      const info = windowsMap.get("files");
+      if(info){
+        const list = info.window.querySelector("#file-list");
+        if(list){
+          const li = document.createElement("li");
+          li.textContent = name;
+          list.appendChild(li);
+        }
+      }
+    }
+  };
+  if(ext==="txt" || ext==="html" || ext==="htm"){
+    reader.readAsText(file);
+  }else{
+    reader.readAsArrayBuffer(file);
+    // non-text files just go to File Explorer list
+    openApp("files");
+    const info = windowsMap.get("files");
+    if(info){
+      const list = info.window.querySelector("#file-list");
+      if(list){
+        const li = document.createElement("li");
+        li.textContent = name;
+        list.appendChild(li);
+      }
+    }
+  }
+});
+
+/* ---------- Games ---------- */
+
+/* Snake */
+function startSnake(canvas){
+  const ctx = canvas.getContext("2d");
+  const grid = 15;
+  const tiles = 20;
+  let snake = [{x:10,y:10}];
+  let dir = {x:1,y:0};
+  let pendingDir = dir;
+  let food = {x:15,y:10};
+
+  document.addEventListener("keydown", function(e){
+    if(e.key==="ArrowUp" && dir.y===0) pendingDir={x:0,y:-1};
+    if(e.key==="ArrowDown" && dir.y===0) pendingDir={x:0,y:1};
+    if(e.key==="ArrowLeft" && dir.x===0) pendingDir={x:-1,y:0};
+    if(e.key==="ArrowRight" && dir.x===0) pendingDir={x:1,y:0};
+  });
+
+  function randomFood(){
+    food.x = Math.floor(Math.random()*tiles);
+    food.y = Math.floor(Math.random()*tiles);
+  }
+
+  function step(){
+    dir = pendingDir;
+    const head = {
+      x:(snake[0].x+dir.x+tiles)%tiles,
+      y:(snake[0].y+dir.y+tiles)%tiles
+    };
+    if(snake.some(seg=>seg.x===head.x && seg.y===head.y)){
+      snake = [{x:10,y:10}];
+      dir = {x:1,y:0};
+      pendingDir = dir;
+      randomFood();
+    }else{
+      snake.unshift(head);
+      if(head.x===food.x && head.y===food.y){
+        randomFood();
+      }else{
+        snake.pop();
+      }
+    }
+
+    ctx.fillStyle="#020617";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle="#22c55e";
+    snake.forEach(seg=>{
+      ctx.fillRect(seg.x*grid, seg.y*grid, grid-2, grid-2);
+    });
+    ctx.fillStyle="#ef4444";
+    ctx.fillRect(food.x*grid, food.y*grid, grid-2, grid-2);
+  }
+  setInterval(step,100);
+}
+
+/* Tetris (compact but working) */
+function startTetris(canvas){
+  const ctx = canvas.getContext("2d");
+  const cols=10, rows=18, size=20;
+  const board = [];
+  for(let r=0;r<rows;r++){ board[r]=new Array(cols).fill(0); }
+
+  const shapes=[
+    [[1,1,1,1]],
+    [[1,1],[1,1]],
+    [[0,1,0],[1,1,1]],
+    [[1,0,0],[1,1,1]],
+    [[0,0,1],[1,1,1]],
+    [[1,1,0],[0,1,1]],
+    [[0,1,1],[1,1,0]]
+  ];
+  const colors=["#0ea5e9","#eab308","#a855f7","#3b82f6","#f97316","#22c55e","#ef4444"];
+  let piece=null, px=3, py=0;
+
+  function newPiece(){
+    const i=Math.floor(Math.random()*shapes.length);
+    piece={shape:shapes[i], color:colors[i]};
+    px=3; py=0;
+    if(collides(0,0,piece.shape)){
+      for(let r=0;r<rows;r++) board[r].fill(0);
+    }
+  }
+  function collides(offX,offY,shape){
+    for(let y=0;y<shape.length;y++){
+      for(let x=0;x<shape[y].length;x++){
+        if(!shape[y][x]) continue;
+        const nx=px+x+offX, ny=py+y+offY;
+        if(nx<0 || nx>=cols || ny>=rows) return true;
+        if(ny>=0 && board[ny][nx]) return true;
+      }
+    }
+    return false;
+  }
+  function merge(){
+    piece.shape.forEach((row,y)=>{
+      row.forEach((val,x)=>{
+        if(val){
+          const ny=py+y;
+          if(ny>=0 && ny<rows) board[ny][px+x]=piece.color;
+        }
+      });
+    });
+  }
+  function rotate(shape){
+    const res=[];
+    for(let x=0;x<shape[0].length;x++){
+      const row=[];
+      for(let y=shape.length-1;y>=0;y--){
+        row.push(shape[y][x]);
+      }
+      res.push(row);
+    }
+    return res;
+  }
+  function clearLines(){
+    for(let y=rows-1;y>=0;y--){
+      if(board[y].every(Boolean)){
+        board.splice(y,1);
+        board.unshift(new Array(cols).fill(0));
+        y++;
+      }
+    }
+  }
+  document.addEventListener("keydown",function(e){
+    if(!piece) return;
+    if(e.key==="ArrowLeft" && !collides(-1,0,piece.shape)) px--;
+    if(e.key==="ArrowRight" && !collides(1,0,piece.shape)) px++;
+    if(e.key==="ArrowDown") tick();
+    if(e.key==="ArrowUp"){
+      const rot=rotate(piece.shape);
+      if(!collides(0,0,rot)) piece.shape=rot;
+    }
+  });
+
+  function tick(){
+    if(!piece) return;
+    if(!collides(0,1,piece.shape)){
+      py++;
+    }else{
+      merge();
+      clearLines();
+      newPiece();
+    }
+  }
+  function draw(){
+    ctx.fillStyle="#020617";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    for(let y=0;y<rows;y++){
+      for(let x=0;x<cols;x++){
+        if(board[y][x]){
+          ctx.fillStyle=board[y][x];
+          ctx.fillRect(x*size,y*size,size-1,size-1);
+        }
+      }
+    }
+    if(piece){
+      ctx.fillStyle=piece.color;
+      piece.shape.forEach((row,y)=>{
+        row.forEach((val,x)=>{
+          if(val){
+            const nx=px+x, ny=py+y;
+            ctx.fillRect(nx*size,ny*size,size-1,size-1);
+          }
+        });
+      });
+    }
+  }
+  newPiece();
+  setInterval(function(){tick();draw();},200);
+}
+
+/* Pong */
+function startPong(canvas){
+  const ctx=canvas.getContext("2d");
+  let bx=150,by=100,dx=3,dy=3,py=80,ai=80;
+  canvas.addEventListener("mousemove",function(e){
+    const rect=canvas.getBoundingClientRect();
+    py=e.clientY-rect.top-30;
+  });
+  function loop(){
+    ctx.fillStyle="#020617";ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle="#e5e7eb";
+    ctx.fillRect(10,py,10,60);
+    ctx.fillRect(canvas.width-20,ai,10,60);
+    ctx.fillRect(bx,by,10,10);
+    ai+= (by-ai-30)*0.05;
+    bx+=dx;by+=dy;
+    if(by<=0 || by>=canvas.height-10) dy*=-1;
+    if(bx<=20 && by>py && by<py+60) dx*=-1;
+    if(bx>=canvas.width-30 && by>ai && by<ai+60) dx*=-1;
+    if(bx<0 || bx>canvas.width) dx*=-1;
+    requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+/* Flappy Bird */
+function startFlappy(canvas){
+  const ctx=canvas.getContext("2d");
+  let y=150,vy=0;
+  const pipes=[];
+  document.addEventListener("keydown",function(e){
+    if(e.key===" ") vy=-6;
+  });
+  setInterval(function(){
+    pipes.push({x:canvas.width, gapY:80+Math.random()*180});
+  },2000);
+
+  function loop(){
+    ctx.fillStyle="#020617";ctx.fillRect(0,0,canvas.width,canvas.height);
+    vy+=0.3;y+=vy;
+    ctx.fillStyle="#facc15";
+    ctx.fillRect(40,y,20,20);
+    for(let i=0;i<pipes.length;i++){
+      const p=pipes[i];
+      p.x-=2;
+      ctx.fillStyle="#22c55e";
+      ctx.fillRect(p.x,0,40,p.gapY-60);
+      ctx.fillRect(p.x,p.gapY,40,canvas.height-p.gapY);
+      if(40<p.x+40 && 60>p.x &&
+        (y<p.gapY-60 || y+20>p.gapY)){
+        y=150;vy=0;pipes.length=0;break;
+      }
+    }
+    requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+/* Minesweeper (simple playable) */
+function startMines(canvas){
+  const ctx=canvas.getContext("2d");
+  const size=10, cell=30, bombsCount=15;
+  const cells=[];
+  for(let y=0;y<size;y++){
+    cells[y]=[];
+    for(let x=0;x<size;x++){
+      cells[y][x]={bomb:false,revealed:false,adj:0};
+    }
+  }
+  let placed=0;
+  while(placed<bombsCount){
+    const x=Math.floor(Math.random()*size);
+    const y=Math.floor(Math.random()*size);
+    if(!cells[y][x].bomb){
+      cells[y][x].bomb=true;placed++;
+    }
+  }
+  for(let y=0;y<size;y++){
+    for(let x=0;x<size;x++){
+      if(cells[y][x].bomb) continue;
+      let n=0;
+      for(let yy=-1;yy<=1;yy++){
+        for(let xx=-1;xx<=1;xx++){
+          const ny=y+yy,nx=x+xx;
+          if(ny>=0&&ny<size&&nx>=0&&nx<size&&cells[ny][nx].bomb)n++;
+        }
+      }
+      cells[y][x].adj=n;
+    }
+  }
+  canvas.addEventListener("click",function(e){
+    const rect=canvas.getBoundingClientRect();
+    const x=Math.floor((e.clientX-rect.left)/cell);
+    const y=Math.floor((e.clientY-rect.top)/cell);
+    reveal(x,y);
+    draw();
+  });
+  function reveal(x,y){
+    if(x<0||x>=size||y<0||y>=size) return;
+    const c=cells[y][x];
+    if(c.revealed) return;
+    c.revealed=true;
+    if(c.bomb){
+      alert("Boom! Restarting game.");
+      startMines(canvas);
+      return;
+    }
+    if(c.adj===0){
+      for(let yy=-1;yy<=1;yy++){
+        for(let xx=-1;xx<=1;xx++){
+          if(xx||yy) reveal(x+xx,y+yy);
+        }
+      }
+    }
+  }
+  function draw(){
+    ctx.fillStyle="#111827";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    for(let y=0;y<size;y++){
+      for(let x=0;x<size;x++){
+        const c=cells[y][x];
+        ctx.strokeStyle="#4b5563";
+        ctx.strokeRect(x*cell,y*cell,cell,cell);
+        if(c.revealed){
+          if(c.bomb){
+            ctx.fillStyle="#ef4444";
+            ctx.beginPath();
+            ctx.arc(x*cell+15,y*cell+15,8,0,Math.PI*2);
+            ctx.fill();
+          }else if(c.adj>0){
+            ctx.fillStyle="#e5e7eb";
+            ctx.font="14px system-ui";
+            ctx.textAlign="center";
+            ctx.textBaseline="middle";
+            ctx.fillText(String(c.adj),x*cell+15,y*cell+15);
+          }
+        }else{
+          ctx.fillStyle="#1f2937";
+          ctx.fillRect(x*cell+1,y*cell+1,cell-2,cell-2);
+        }
+      }
+    }
+  }
+  draw();
+}
+
+/* 2048 */
+function start2048(canvas){
+  const ctx=canvas.getContext("2d");
+  const size=4;
+  const grid=[];
+  for(let y=0;y<size;y++){
+    grid[y]=[];
+    for(let x=0;x<size;x++) grid[y][x]=0;
+  }
+  function addTile(){
+    const empty=[];
+    for(let y=0;y<size;y++){
+      for(let x=0;x<size;x++){
+        if(grid[y][x]===0) empty.push({x:x,y:y});
+      }
+    }
+    if(!empty.length) return;
+    const spot=empty[Math.floor(Math.random()*empty.length)];
+    grid[spot.y][spot.x]=(Math.random()<0.9)?2:4;
+  }
+  function draw(){
+    ctx.fillStyle="#020617";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    const cell=70;
+    for(let y=0;y<size;y++){
+      for(let x=0;x<size;x++){
+        const v=grid[y][x];
+        ctx.fillStyle=v? "#f59e0b":"#1f2937";
+        ctx.fillRect(x*cell+5,y*cell+5,cell-10,cell-10);
+        if(v){
+          ctx.fillStyle="#111827";
+          ctx.font="20px system-ui";
+          ctx.textAlign="center";
+          ctx.textBaseline="middle";
+          ctx.fillText(String(v),x*cell+cell/2,y*cell+cell/2);
+        }
+      }
+    }
+  }
+  function slide(row){
+    const arr=row.filter(v=>v);
+    for(let i=0;i<arr.length-1;i++){
+      if(arr[i]===arr[i+1]){
+        arr[i]*=2;
+        arr[i+1]=0;
+      }
+    }
+    const res=arr.filter(v=>v);
+    while(res.length<size) res.push(0);
+    return res;
+  }
+  function moveLeft(){
+    let moved=false;
+    for(let y=0;y<size;y++){
+      const orig=grid[y].slice();
+      const row=slide(grid[y]);
+      grid[y]=row;
+      if(row.toString()!==orig.toString()) moved=true;
+    }
+    if(moved) addTile();
+    draw();
+  }
+  function moveRight(){
+    let moved=false;
+    for(let y=0;y<size;y++){
+      const orig=grid[y].slice();
+      let row=grid[y].slice().reverse();
+      row=slide(row).reverse();
+      grid[y]=row;
+      if(row.toString()!==orig.toString()) moved=true;
+    }
+    if(moved) addTile();
+    draw();
+  }
+  function moveUp(){
+    let moved=false;
+    for(let x=0;x<size;x++){
+      const col=[];
+      for(let y=0;y<size;y++) col.push(grid[y][x]);
+      const orig=col.slice();
+      let res=slide(col);
+      for(let y=0;y<size;y++) grid[y][x]=res[y];
+      if(res.toString()!==orig.toString()) moved=true;
+    }
+    if(moved) addTile();
+    draw();
+  }
+  function moveDown(){
+    let moved=false;
+    for(let x=0;x<size;x++){
+      const col=[];
+      for(let y=0;y<size;y++) col.push(grid[y][x]);
+      const orig=col.slice();
+      let res=col.reverse();
+      res=slide(res).reverse();
+      for(let y=0;y<size;y++) grid[y][x]=res[y];
+      if(res.toString()!==orig.toString()) moved=true;
+    }
+    if(moved) addTile();
+    draw();
+  }
+
+  document.addEventListener("keydown",function(e){
+    if(e.key==="ArrowLeft") moveLeft();
+    if(e.key==="ArrowRight") moveRight();
+    if(e.key==="ArrowUp") moveUp();
+    if(e.key==="ArrowDown") moveDown();
+  });
+
+  addTile(); addTile(); draw();
+}
+</script>
+</body>
+</html>
