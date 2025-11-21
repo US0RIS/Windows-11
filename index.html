@@ -14,6 +14,7 @@ html,body{
   position:absolute;inset:0;
   background:#111827;
 }
+
 /* Desktop icons */
 .icon{
   position:absolute;
@@ -107,6 +108,7 @@ html,body{
   display:flex;
   align-items:center;
   justify-content:center;
+  cursor:pointer;
 }
 .tray-icon svg{
   width:100%;
@@ -175,6 +177,112 @@ canvas{
   display:block;
   margin:0 auto;
 }
+
+/* Start menu */
+#start-menu{
+  position:absolute;
+  bottom:56px;
+  left:50%;
+  transform:translateX(-50%);
+  width:500px;
+  max-width:90vw;
+  height:420px;
+  background:rgba(15,23,42,0.98);
+  border-radius:18px;
+  border:1px solid rgba(148,163,184,0.5);
+  box-shadow:0 20px 50px rgba(0,0,0,0.8);
+  padding:16px 18px;
+  box-sizing:border-box;
+  display:none;
+  z-index:250;
+  backdrop-filter:blur(18px);
+}
+#start-pinned-title{
+  font-size:12px;
+  color:#9ca3af;
+  margin-bottom:8px;
+}
+#start-grid{
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:10px;
+}
+.start-tile{
+  height:72px;
+  border-radius:12px;
+  background:#111827;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  font-size:11px;
+  cursor:pointer;
+}
+.start-tile:hover{
+  background:#1f2937;
+}
+.start-tile-icon{
+  width:28px;height:28px;
+  border-radius:8px;
+  background:#1d4ed8;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-bottom:4px;
+  font-size:18px;
+}
+#start-search{
+  width:100%;
+  margin-top:14px;
+  padding:6px 10px;
+  border-radius:8px;
+  border:1px solid #374151;
+  background:#020617;
+  color:#e5e7eb;
+  font-size:12px;
+  box-sizing:border-box;
+}
+
+/* Quick settings panel */
+#quick-panel{
+  position:absolute;
+  bottom:56px;
+  right:12px;
+  width:320px;
+  background:rgba(15,23,42,0.98);
+  border-radius:16px;
+  border:1px solid rgba(148,163,184,0.5);
+  box-shadow:0 20px 50px rgba(0,0,0,0.8);
+  padding:12px 14px;
+  box-sizing:border-box;
+  display:none;
+  z-index:260;
+  backdrop-filter:blur(18px);
+  font-size:12px;
+}
+.q-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:10px;
+}
+.q-toggle{
+  padding:6px 12px;
+  border-radius:10px;
+  border:1px solid #4b5563;
+  background:#111827;
+  cursor:pointer;
+}
+.q-toggle.active{
+  background:#1d4ed8;
+  border-color:#3b82f6;
+}
+.q-label{
+  color:#d1d5db;
+}
+.q-slider{
+  width:100%;
+}
 </style>
 </head>
 <body>
@@ -212,15 +320,40 @@ canvas{
   </div>
 </div>
 
+<!-- Start menu -->
+<div id="start-menu">
+  <div id="start-pinned-title">Pinned</div>
+  <div id="start-grid">
+    <!-- tiles created in JS -->
+  </div>
+  <input id="start-search" placeholder="Type to search (fake)" />
+</div>
+
+<!-- Quick settings panel -->
+<div id="quick-panel">
+  <div class="q-row">
+    <span class="q-label">Wi-Fi</span>
+    <button id="wifi-toggle" class="q-toggle active">On</button>
+  </div>
+  <div class="q-row">
+    <span class="q-label">Volume</span>
+    <input id="vol-slider" class="q-slider" type="range" min="0" max="100" value="70">
+  </div>
+  <div class="q-row">
+    <span class="q-label">Battery</span>
+    <span id="battery-status" class="q-label">100% • Plugged in</span>
+  </div>
+</div>
+
 <!-- Taskbar -->
 <div id="taskbar">
   <div id="taskbar-left">
-    <button class="start-btn" title="Start">⊞</button>
+    <button id="start-button" class="start-btn" title="Start">⊞</button>
   </div>
   <div id="taskbar-center"></div>
   <div id="taskbar-right">
     <!-- Wi-Fi (Windows-ish) -->
-    <div class="tray-icon" title="Wi-Fi">
+    <div id="wifi-icon" class="tray-icon" title="Wi-Fi">
       <svg viewBox="0 0 24 24">
         <path d="M12 18.5c-.7 0-1.3.3-1.8.7l1.8 2.3 1.8-2.3c-.5-.4-1.1-.7-1.8-.7z"/>
         <path d="M4.9 13.6 3 11.7C5.5 9.2 8.6 8 12 8s6.5 1.2 9 3.7l-1.9 1.9C17.2 11.7 14.8 11 12 11s-5.2.7-7.1 2.6z"/>
@@ -229,7 +362,7 @@ canvas{
     </div>
 
     <!-- Volume -->
-    <div class="tray-icon" title="Volume">
+    <div id="volume-icon" class="tray-icon" title="Volume">
       <svg viewBox="0 0 24 24">
         <path d="M4 9v6h3l4 4V5L7 9H4z"/>
         <path d="M16.5 8.1 15.1 9.5c.6.6.9 1.4.9 2.5s-.3 1.9-.9 2.5l1.4 1.4C17.5 14.9 18 13.8 18 12s-.5-2.9-1.5-3.9z"/>
@@ -238,7 +371,7 @@ canvas{
     </div>
 
     <!-- Battery -->
-    <div class="tray-icon" title="Battery">
+    <div id="battery-icon" class="tray-icon" title="Battery">
       <svg viewBox="0 0 24 24">
         <rect x="3" y="8" width="14" height="8" rx="1.5" ry="1.5"/>
         <rect x="18" y="10" width="2" height="4" rx="1" ry="1"/>
@@ -504,6 +637,73 @@ document.addEventListener("drop", function(e){
       }
     }
   }
+});
+
+/* ---------- Start menu + Quick settings ---------- */
+const startMenu = document.getElementById("start-menu");
+const quickPanel = document.getElementById("quick-panel");
+const startButton = document.getElementById("start-button");
+const wifiIcon = document.getElementById("wifi-icon");
+const volumeIcon = document.getElementById("volume-icon");
+const batteryIcon = document.getElementById("battery-icon");
+const wifiToggle = document.getElementById("wifi-toggle");
+const volSlider = document.getElementById("vol-slider");
+const batteryStatus = document.getElementById("battery-status");
+
+function toggleStartMenu(){
+  const isVisible = startMenu.style.display==="block";
+  startMenu.style.display = isVisible ? "none" : "block";
+  if(!isVisible){
+    quickPanel.style.display="none";
+  }
+}
+function toggleQuickPanel(){
+  const isVisible = quickPanel.style.display==="block";
+  quickPanel.style.display = isVisible ? "none" : "block";
+  if(!isVisible){
+    startMenu.style.display="none";
+  }
+}
+
+startButton.addEventListener("click", toggleStartMenu);
+wifiIcon.addEventListener("click", toggleQuickPanel);
+volumeIcon.addEventListener("click", toggleQuickPanel);
+batteryIcon.addEventListener("click", toggleQuickPanel);
+
+wifiToggle.addEventListener("click", ()=>{
+  wifiToggle.classList.toggle("active");
+  wifiToggle.textContent = wifiToggle.classList.contains("active") ? "On" : "Off";
+});
+
+volSlider.addEventListener("input", ()=>{
+  const v = volSlider.value;
+  batteryStatus.textContent = "100% • Volume " + v + "%";
+});
+
+/* Build Start menu tiles */
+const startTiles = [
+  {app:"browser", label:"Browser", icon:"🌐"},
+  {app:"notes", label:"Notes", icon:"📝"},
+  {app:"files", label:"Files", icon:"🗂️"},
+  {app:"snake", label:"Snake", icon:"🐍"},
+  {app:"tetris", label:"Tetris", icon:"🧱"},
+  {app:"pong", label:"Pong", icon:"🏓"},
+  {app:"flappy", label:"Flappy", icon:"🐤"},
+  {app:"mines", label:"Mines", icon:"💣"},
+  {app:"g2048", label:"2048", icon:"🔢"}
+];
+const startGrid = document.getElementById("start-grid");
+startTiles.forEach(t=>{
+  const d=document.createElement("div");
+  d.className="start-tile";
+  d.innerHTML =
+    "<div class='start-tile-icon'>"+t.icon+"</div>" +
+    "<div>"+t.label+"</div>";
+  d.addEventListener("click", ()=>{
+    openApp(t.app);
+    startMenu.style.display="none";
+  });
+  startGrid.appendChild(d);
 });
 
 /* ---------- Games ---------- */
