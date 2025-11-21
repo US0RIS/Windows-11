@@ -541,9 +541,9 @@ canvas{
 let zCounter = 100;
 const windowsMap = new Map();
 const desktop = document.getElementById("desktop");
-let dynamicIconCount = 1; // store occupies first dynamic column slot
+let dynamicIconCount = 1; // store column row counter
 
-/* App metadata for Start menu + Store + dynamic icons */
+/* App metadata */
 const appMeta = {
   browser:{label:"Browser",icon:"🌐"},
   notes:{label:"Notes",icon:"📝"},
@@ -671,15 +671,15 @@ function openApp(appId){
   /* App content */
   if(appId==="browser"){
     body.innerHTML =
-      "<input type='text' id='url-input' placeholder='Search or type URL' " +
+      "<input type='text' class='url-input' placeholder='Search or type URL' " +
       "style='width:100%;padding:6px;border-radius:8px;border:1px solid #4b5563;" +
       "background:#020617;color:#e5e7eb;box-sizing:border-box;margin-bottom:8px;font-size:13px'>" +
       "<iframe></iframe>";
-    const input = body.querySelector("#url-input");
+    const input = body.querySelector(".url-input");
     const iframe = body.querySelector("iframe");
     input.addEventListener("keydown", function(e){
       if(e.key==="Enter"){
-        var v = input.value.trim();
+        let v = input.value.trim();
         if(!v) return;
         if(v.indexOf(".")===-1 && v.indexOf("http")==-1){
           v = "https://duckduckgo.com/?q=" + encodeURIComponent(input.value);
@@ -687,14 +687,14 @@ function openApp(appId){
           v = "https://" + v;
         }
         window.open(v,"_blank");
-        iframe.srcdoc =
-          "<div style='display:flex;align-items:center;justify-content:center;height:100%;" +
-          "font-family:system-ui;color:white;background:#020617;'>" +
-          "<div style='text-align:center;'>" +
-          "<div style='font-size:18px;margin-bottom:6px;'>Opened in real browser:</div>" +
-          "<div style='font-size:12px;color:#38bdf8;word-wrap:break-word;'>" +
-          v.replace(/</g,\"&lt;\") +
-          "</div></div></div>";
+        const safe = v.replace(/</g,"&lt;");
+        iframe.srcdoc = `
+<div style="display:flex;align-items:center;justify-content:center;height:100%;font-family:system-ui;color:white;background:#020617;">
+  <div style="text-align:center;">
+    <div style="font-size:18px;margin-bottom:6px;">Opened in real browser:</div>
+    <div style="font-size:12px;color:#38bdf8;word-wrap:break-word;">${safe}</div>
+  </div>
+</div>`;
       }
     });
   }else if(appId==="notes"){
@@ -907,7 +907,7 @@ volSlider.addEventListener("input", ()=>{
 });
 
 /* ---------- App Store logic ---------- */
-const installedApps = new Set(); // for store-installed apps only
+const installedApps = new Set(); // store-installed apps only
 
 function addDesktopIcon(appId){
   const meta = appMeta[appId];
@@ -1048,7 +1048,7 @@ function startSnake(canvas){
   setInterval(step,100);
 }
 
-/* Tetris (compact but working) */
+/* Tetris */
 function startTetris(canvas){
   const ctx = canvas.getContext("2d");
   const cols=10, rows=18, size=20;
