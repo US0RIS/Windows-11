@@ -146,6 +146,7 @@ html,body{
   font-size:12px;
   cursor:pointer;
   white-space:nowrap;
+  transition:background .15s ease;
 }
 .task-button.active{
   background:rgba(148,163,184,0.35);
@@ -536,6 +537,131 @@ canvas{
 .store-card-btn.installed{
   background:#16a34a;
 }
+
+/* Settings app */
+.settings-layout{
+  display:flex;
+  height:100%;
+  gap:10px;
+}
+.settings-sidebar{
+  width:140px;
+  border-radius:12px;
+  background:#020617;
+  padding:10px;
+  box-sizing:border-box;
+  font-size:12px;
+}
+.settings-sidebar-title{
+  font-weight:600;
+  margin-bottom:8px;
+}
+.settings-sidebar-item{
+  padding:6px 8px;
+  border-radius:8px;
+  cursor:pointer;
+}
+.settings-sidebar-item.active,
+.settings-sidebar-item:hover{
+  background:#1f2937;
+}
+.settings-main{
+  flex:1;
+  border-radius:12px;
+  background:#020617;
+  padding:10px 12px;
+  box-sizing:border-box;
+  font-size:13px;
+}
+.settings-section-title{
+  font-size:14px;
+  font-weight:600;
+  margin-bottom:8px;
+}
+.wallpaper-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
+  gap:8px;
+}
+.wallpaper-thumb{
+  height:70px;
+  border-radius:10px;
+  border:2px solid transparent;
+  cursor:pointer;
+  position:relative;
+  overflow:hidden;
+}
+.wallpaper-thumb::after{
+  content:"";
+  position:absolute;
+  inset:0;
+}
+.wallpaper-thumb.active{
+  border-color:#38bdf8;
+}
+.wallpaper-thumb-default::after{
+  background:
+    radial-gradient(circle at 30% 60%, rgba(37,99,235,0.98) 0, rgba(37,99,235,0.98) 26%, transparent 60%),
+    radial-gradient(circle at 60% 60%, rgba(59,130,246,0.96) 0, rgba(59,130,246,0.96) 24%, transparent 58%),
+    radial-gradient(circle at 45% 40%, rgba(96,165,250,0.88) 0, rgba(96,165,250,0.88) 26%, transparent 55%),
+    linear-gradient(135deg,#e5f0ff 0,#dbeafe 40%,#cbd5f5 100%);
+}
+.wallpaper-thumb-dark::after{
+  background:radial-gradient(circle at 10% 0%,#0f172a,#020617 55%);
+}
+.wallpaper-thumb-blue::after{
+  background:linear-gradient(135deg,#1d4ed8,#3b82f6);
+}
+.settings-note{
+  font-size:11px;
+  color:#9ca3af;
+  margin-top:8px;
+}
+
+/* Task view overlay */
+#taskview-overlay{
+  position:absolute;
+  inset:0;
+  background:rgba(15,23,42,0.75);
+  backdrop-filter:blur(16px);
+  display:none;
+  z-index:300;
+}
+#taskview-inner{
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  max-width:80vw;
+  max-height:70vh;
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  justify-content:center;
+  overflow:auto;
+}
+.taskview-card{
+  width:200px;
+  height:120px;
+  border-radius:12px;
+  background:#020617;
+  border:1px solid rgba(148,163,184,0.6);
+  padding:8px;
+  box-sizing:border-box;
+  cursor:pointer;
+  font-size:12px;
+  color:#e5e7eb;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+.taskview-card-title{
+  font-weight:600;
+}
+.taskview-card-sub{
+  font-size:11px;
+  color:#9ca3af;
+}
 </style>
 </head>
 <body>
@@ -572,9 +698,12 @@ canvas{
     <div class="icon-inner">🔢</div><div class="icon-label">2048</div>
   </div>
 
-  <!-- Store icon column -->
+  <!-- Store & Settings column -->
   <div class="icon" style="top:20px;left:260px" data-app="store">
     <div class="icon-inner">🛍️</div><div class="icon-label">Store</div>
+  </div>
+  <div class="icon" style="top:120px;left:260px" data-app="settings">
+    <div class="icon-inner">⚙️</div><div class="icon-label">Settings</div>
   </div>
 </div>
 
@@ -644,6 +773,11 @@ canvas{
   </div>
 </div>
 
+<!-- Task view overlay -->
+<div id="taskview-overlay">
+  <div id="taskview-inner"></div>
+</div>
+
 <!-- Taskbar -->
 <div id="taskbar">
   <div id="taskbar-inner">
@@ -656,11 +790,11 @@ canvas{
         </div>
       </button>
 
-      <!-- Search, Task View, Widgets, Chat icons (visual only) -->
-      <div class="tb-icon" title="Search">🔍</div>
-      <div class="tb-icon" title="Task view">🗔</div>
-      <div class="tb-icon" title="Widgets">⬛</div>
-      <div class="tb-icon" title="Chat">💬</div>
+      <!-- Search, Task View, Widgets, Chat icons -->
+      <div id="tb-search" class="tb-icon" title="Search">🔍</div>
+      <div id="tb-taskview" class="tb-icon" title="Task view">🗔</div>
+      <div id="tb-widgets" class="tb-icon" title="Widgets">⬛</div>
+      <div id="tb-chat" class="tb-icon" title="Chat">💬</div>
     </div>
 
     <div id="taskbar-center"></div>
@@ -715,7 +849,8 @@ const appMeta = {
   store:{label:"Store",icon:"🛍️"},
   paint:{label:"Paint",icon:"🎨"},
   music:{label:"Music",icon:"🎵"},
-  weather:{label:"Weather",icon:"☀️"}
+  weather:{label:"Weather",icon:"☀️"},
+  settings:{label:"Settings",icon:"⚙️"}
 };
 
 /* ---------- Clock ---------- */
@@ -786,14 +921,59 @@ function addTaskButton(appId, title){
     const info = windowsMap.get(appId);
     if(!info) return;
     const w = info.window;
-    w.style.display = "flex";
-    bringToFront(w);
-    btn.classList.add("active");
+    const isHidden = (w.style.display === "none");
+    if(isHidden || info.minimized){
+      w.style.display = "flex";
+      bringToFront(w);
+      info.minimized = false;
+      btn.classList.add("active");
+    }else{
+      w.style.display = "none";
+      info.minimized = true;
+      btn.classList.remove("active");
+    }
   });
   taskbarCenter.appendChild(btn);
   return btn;
 }
 function removeTaskButton(btn){ btn.remove(); }
+
+function minimizeWindow(appId){
+  const info = windowsMap.get(appId);
+  if(!info) return;
+  info.window.style.display = "none";
+  info.minimized = true;
+  info.taskButton.classList.remove("active");
+}
+function toggleMaximizeWindow(appId){
+  const info = windowsMap.get(appId);
+  if(!info) return;
+  const w = info.window;
+  if(!info.maximized){
+    const rect = w.getBoundingClientRect();
+    info.prevRect = {left:rect.left, top:rect.top, width:rect.width, height:rect.height};
+    w.style.left = "8px";
+    w.style.top  = "8px";
+    w.style.width = "calc(100% - 16px)";
+    w.style.height = "calc(100% - 60px)";
+    info.maximized = true;
+  }else{
+    if(info.prevRect){
+      w.style.left   = info.prevRect.left + "px";
+      w.style.top    = info.prevRect.top + "px";
+      w.style.width  = info.prevRect.width + "px";
+      w.style.height = info.prevRect.height + "px";
+    }
+    info.maximized = false;
+  }
+}
+function closeWindow(appId){
+  const info = windowsMap.get(appId);
+  if(!info) return;
+  info.window.remove();
+  removeTaskButton(info.taskButton);
+  windowsMap.delete(appId);
+}
 
 /* ---------- Open App ---------- */
 function openApp(appId){
@@ -802,6 +982,7 @@ function openApp(appId){
     const w = info.window;
     w.style.display = "flex";
     bringToFront(w);
+    info.minimized = false;
     info.taskButton.classList.add("active");
     return;
   }
@@ -916,20 +1097,44 @@ function openApp(appId){
       <p style="font-size:40px;margin:10px 0;">72°☀️</p>
       <p>Clear skies in Your City.</p>
       <p style="font-size:11px;color:#9ca3af;margin-top:8px;">Data is static – this is a mock weather app.</p>`;
+  }else if(appId==="settings"){
+    title = "Settings";
+    body.innerHTML = `
+      <div class="settings-layout">
+        <div class="settings-sidebar">
+          <div class="settings-sidebar-title">Settings</div>
+          <div class="settings-sidebar-item active">System</div>
+          <div class="settings-sidebar-item" data-section="personalization">Personalization</div>
+        </div>
+        <div class="settings-main">
+          <div class="settings-section-title">Personalization & wallpaper</div>
+          <div class="wallpaper-grid">
+            <div class="wallpaper-thumb wallpaper-thumb-default active" data-wallpaper="default"></div>
+            <div class="wallpaper-thumb wallpaper-thumb-dark" data-wallpaper="dark"></div>
+            <div class="wallpaper-thumb wallpaper-thumb-blue" data-wallpaper="blue"></div>
+          </div>
+          <div class="settings-note">
+            Choose a wallpaper preset. You can also drag &amp; drop an image file onto the desktop to use it as a background.
+          </div>
+        </div>
+      </div>`;
+    setupSettings(body);
   }
 
   titleEl.textContent = title;
   makeDraggable(win);
   bringToFront(win);
 
+  const info = {window:win, taskButton:null, appId, minimized:false, maximized:false, prevRect:null};
   const taskButton = addTaskButton(appId, title);
-  win.querySelector(".win-btn.close").addEventListener("click", ()=>{
-    win.remove();
-    removeTaskButton(taskButton);
-    windowsMap.delete(appId);
-  });
+  info.taskButton = taskButton;
+  windowsMap.set(appId, info);
 
-  windowsMap.set(appId, {window:win, taskButton:taskButton});
+  const btns = win.querySelectorAll(".win-btn");
+  const btnMin = btns[0], btnMax = btns[1], btnClose = btns[2];
+  btnMin.addEventListener("click", ()=> minimizeWindow(appId));
+  btnMax.addEventListener("click", ()=> toggleMaximizeWindow(appId));
+  btnClose.addEventListener("click", ()=> closeWindow(appId));
 }
 
 /* ---------- Drag & drop files (wallpaper / open) ---------- */
@@ -946,6 +1151,7 @@ document.addEventListener("drop", function(e){
   if(["png","jpg","jpeg","gif","webp"].indexOf(ext)!==-1){
     const url = URL.createObjectURL(file);
     desktop.style.background = "url("+url+") center/cover no-repeat";
+    document.querySelectorAll(".wallpaper-thumb").forEach(t=>t.classList.remove("active"));
     return;
   }
 
@@ -998,7 +1204,7 @@ document.addEventListener("drop", function(e){
   }
 });
 
-/* ---------- Start menu + Quick settings ---------- */
+/* ---------- Start menu + Quick settings + Task view ---------- */
 const startMenu = document.getElementById("start-menu");
 const quickPanel = document.getElementById("quick-panel");
 const startButton = document.getElementById("start-button");
@@ -1008,6 +1214,13 @@ const batteryIcon = document.getElementById("battery-icon");
 const volSlider = document.getElementById("vol-slider");
 const batteryStatus = document.getElementById("battery-status");
 const startGrid = document.getElementById("start-grid");
+const taskviewOverlay = document.getElementById("taskview-overlay");
+const taskviewInner = document.getElementById("taskview-inner");
+
+const tbSearch   = document.getElementById("tb-search");
+const tbTaskView = document.getElementById("tb-taskview");
+const tbWidgets  = document.getElementById("tb-widgets");
+const tbChat     = document.getElementById("tb-chat");
 
 const tileWifi = document.getElementById("tile-wifi");
 const tileBt = document.getElementById("tile-bt");
@@ -1015,7 +1228,7 @@ const tileAirplane = document.getElementById("tile-airplane");
 
 const pinnedApps = new Set([
   "browser","notes","files",
-  "snake","tetris","pong","flappy","mines","g2048","store"
+  "snake","tetris","pong","flappy","mines","g2048","store","settings","weather"
 ]);
 
 function buildStartMenu(){
@@ -1058,6 +1271,62 @@ startButton.addEventListener("click", toggleStartMenu);
 wifiIcon.addEventListener("click", toggleQuickPanel);
 volumeIcon.addEventListener("click", toggleQuickPanel);
 batteryIcon.addEventListener("click", toggleQuickPanel);
+
+/* Search button -> open Start + focus search */
+tbSearch.addEventListener("click", ()=>{
+  startMenu.style.display = "block";
+  quickPanel.style.display = "none";
+  const input = document.getElementById("start-search");
+  if(input) input.focus();
+});
+
+/* Task view button -> overlay */
+tbTaskView.addEventListener("click", ()=>{
+  if(taskviewOverlay.style.display==="block"){
+    taskviewOverlay.style.display="none";
+    return;
+  }
+  rebuildTaskView();
+  taskviewOverlay.style.display="block";
+});
+
+function rebuildTaskView(){
+  taskviewInner.innerHTML = "";
+  if(windowsMap.size===0){
+    const msg = document.createElement("div");
+    msg.style.color="#9ca3af";
+    msg.textContent = "No open windows.";
+    taskviewInner.appendChild(msg);
+    return;
+  }
+  windowsMap.forEach((info, appId)=>{
+    const card = document.createElement("div");
+    card.className="taskview-card";
+    const title = info.window.querySelector(".wtitle")?.textContent || appId;
+    card.innerHTML = `
+      <div class="taskview-card-title">${title}</div>
+      <div class="taskview-card-sub">${appId}</div>
+      <div class="taskview-card-sub">Click to switch</div>`;
+    card.addEventListener("click", ()=>{
+      taskviewOverlay.style.display="none";
+      info.window.style.display="flex";
+      info.minimized=false;
+      bringToFront(info.window);
+      info.taskButton.classList.add("active");
+    });
+    taskviewInner.appendChild(card);
+  });
+}
+
+taskviewOverlay.addEventListener("click", e=>{
+  if(e.target===taskviewOverlay){
+    taskviewOverlay.style.display="none";
+  }
+});
+
+/* Widgets -> Weather; Chat -> Notes (mock) */
+tbWidgets.addEventListener("click", ()=> openApp("weather"));
+tbChat.addEventListener("click", ()=> openApp("notes"));
 
 /* Quick settings tile toggles (visual only) */
 [tileWifi,tileBt,tileAirplane].forEach(tile=>{
@@ -1132,6 +1401,29 @@ function buildStoreApps(container){
       }
     });
     container.appendChild(card);
+  });
+}
+
+/* ---------- Settings helpers ---------- */
+function setupSettings(root){
+  const thumbs = root.querySelectorAll(".wallpaper-thumb");
+  thumbs.forEach(thumb=>{
+    thumb.addEventListener("click", ()=>{
+      thumbs.forEach(t=>t.classList.remove("active"));
+      thumb.classList.add("active");
+      const mode = thumb.getAttribute("data-wallpaper");
+      if(mode==="default"){
+        desktop.style.background =
+          "radial-gradient(circle at 30% 60%, rgba(37,99,235,0.98) 0, rgba(37,99,235,0.98) 26%, transparent 60%)," +
+          "radial-gradient(circle at 60% 60%, rgba(59,130,246,0.96) 0, rgba(59,130,246,0.96) 24%, transparent 58%)," +
+          "radial-gradient(circle at 45% 40%, rgba(96,165,250,0.88) 0, rgba(96,165,250,0.88) 26%, transparent 55%)," +
+          "linear-gradient(135deg,#e5f0ff 0,#dbeafe 40%,#cbd5f5 100%)";
+      }else if(mode==="dark"){
+        desktop.style.background = "radial-gradient(circle at 10% 0%,#0f172a,#020617 55%)";
+      }else if(mode==="blue"){
+        desktop.style.background = "linear-gradient(135deg,#1d4ed8,#3b82f6)";
+      }
+    });
   });
 }
 
@@ -1385,41 +1677,39 @@ function startFlappy(canvas){
 function startMines(canvas){
   const ctx=canvas.getContext("2d");
   const size=10, cell=30, bombsCount=15;
-  const cells=[];
-  for(let y=0;y<size;y++){
-    cells[y]=[];
-    for(let x=0;x<size;x++){
-      cells[y][x]={bomb:false,revealed:false,adj:0};
-    }
-  }
-  let placed=0;
-  while(placed<bombsCount){
-    const x=Math.floor(Math.random()*size);
-    const y=Math.floor(Math.random()*size);
-    if(!cells[y][x].bomb){
-      cells[y][x].bomb=true;placed++;
-    }
-  }
-  for(let y=0;y<size;y++){
-    for(let x=0;x<size;x++){
-      if(cells[y][x].bomb) continue;
-      let n=0;
-      for(let yy=-1;yy<=1;yy++){
-        for(let xx=-1;xx<=1;xx++){
-          const ny=y+yy,nx=x+xx;
-          if(ny>=0&&ny<size&&nx>=0&&nx<size&&cells[ny][nx].bomb)n++;
-        }
+  let cells;
+
+  function initBoard(){
+    cells=[];
+    for(let y=0;y<size;y++){
+      cells[y]=[];
+      for(let x=0;x<size;x++){
+        cells[y][x]={bomb:false,revealed:false,adj:0};
       }
-      cells[y][x].adj=n;
+    }
+    let placed=0;
+    while(placed<bombsCount){
+      const x=Math.floor(Math.random()*size);
+      const y=Math.floor(Math.random()*size);
+      if(!cells[y][x].bomb){
+        cells[y][x].bomb=true;placed++;
+      }
+    }
+    for(let y=0;y<size;y++){
+      for(let x=0;x<size;x++){
+        if(cells[y][x].bomb) continue;
+        let n=0;
+        for(let yy=-1;yy<=1;yy++){
+          for(let xx=-1;xx<=1;xx++){
+            const ny=y+yy,nx=x+xx;
+            if(ny>=0&&ny<size&&nx>=0&&nx<size&&cells[ny][nx].bomb)n++;
+          }
+        }
+        cells[y][x].adj=n;
+      }
     }
   }
-  canvas.addEventListener("click",function(e){
-    const rect=canvas.getBoundingClientRect();
-    const x=Math.floor((e.clientX-rect.left)/cell);
-    const y=Math.floor((e.clientY-rect.top)/cell);
-    reveal(x,y);
-    draw();
-  });
+
   function reveal(x,y){
     if(x<0||x>=size||y<0||y>=size) return;
     const c=cells[y][x];
@@ -1427,7 +1717,8 @@ function startMines(canvas){
     c.revealed=true;
     if(c.bomb){
       alert("Boom! Restarting game.");
-      startMines(canvas);
+      initBoard();
+      draw();
       return;
     }
     if(c.adj===0){
@@ -1466,6 +1757,16 @@ function startMines(canvas){
       }
     }
   }
+
+  canvas.onclick = function(e){
+    const rect=canvas.getBoundingClientRect();
+    const x=Math.floor((e.clientX-rect.left)/cell);
+    const y=Math.floor((e.clientY-rect.top)/cell);
+    reveal(x,y);
+    draw();
+  };
+
+  initBoard();
   draw();
 }
 
