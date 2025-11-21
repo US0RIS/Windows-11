@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Windows 11 Emulator – GitHub Ready Fixed</title>
+<title>Windows 11 Emulator – GitHub Ready</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
 html,body{
@@ -64,7 +64,7 @@ html,body{
 #taskbar-left{gap:6px;}
 #taskbar-right{
   gap:10px;
-  min-width:140px;
+  min-width:160px;
   justify-content:flex-end;
 }
 
@@ -102,12 +102,16 @@ html,body{
 
 /* Tray icons */
 .tray-icon{
-  width:20px;
-  height:20px;
-  font-size:16px;
+  width:22px;
+  height:22px;
   display:flex;
   align-items:center;
   justify-content:center;
+}
+.tray-icon svg{
+  width:100%;
+  height:100%;
+  fill:#e5e7eb;
 }
 .timebox{font-size:11px;line-height:1.2;text-align:right;}
 
@@ -215,9 +219,33 @@ canvas{
   </div>
   <div id="taskbar-center"></div>
   <div id="taskbar-right">
-    <div class="tray-icon" title="Wi-Fi">📶</div>
-    <div class="tray-icon" title="Volume">🔊</div>
-    <div class="tray-icon" title="Battery">🔋</div>
+    <!-- Wi-Fi (Windows-ish) -->
+    <div class="tray-icon" title="Wi-Fi">
+      <svg viewBox="0 0 24 24">
+        <path d="M12 18.5c-.7 0-1.3.3-1.8.7l1.8 2.3 1.8-2.3c-.5-.4-1.1-.7-1.8-.7z"/>
+        <path d="M4.9 13.6 3 11.7C5.5 9.2 8.6 8 12 8s6.5 1.2 9 3.7l-1.9 1.9C17.2 11.7 14.8 11 12 11s-5.2.7-7.1 2.6z"/>
+        <path d="M8.3 17 6.4 15.1C7.9 13.6 9.8 13 12 13s4.1.6 5.6 2.1L15.7 17C14.6 15.9 13.4 15.5 12 15.5S9.4 15.9 8.3 17z"/>
+      </svg>
+    </div>
+
+    <!-- Volume -->
+    <div class="tray-icon" title="Volume">
+      <svg viewBox="0 0 24 24">
+        <path d="M4 9v6h3l4 4V5L7 9H4z"/>
+        <path d="M16.5 8.1 15.1 9.5c.6.6.9 1.4.9 2.5s-.3 1.9-.9 2.5l1.4 1.4C17.5 14.9 18 13.8 18 12s-.5-2.9-1.5-3.9z"/>
+        <path d="m18.9 5.7-1.4 1.4C18.4 8 19 9.8 19 12s-.6 4-1.5 4.9l1.4 1.4C20.3 17.7 21 15.9 21 12s-.7-5.7-2.1-6.3z"/>
+      </svg>
+    </div>
+
+    <!-- Battery -->
+    <div class="tray-icon" title="Battery">
+      <svg viewBox="0 0 24 24">
+        <rect x="3" y="8" width="14" height="8" rx="1.5" ry="1.5"/>
+        <rect x="18" y="10" width="2" height="4" rx="1" ry="1"/>
+        <rect x="4.5" y="9.5" width="9" height="5" fill="#22c55e"/>
+      </svg>
+    </div>
+
     <div class="timebox">
       <div id="clock-time"></div>
       <div id="clock-date"></div>
