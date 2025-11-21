@@ -10,6 +10,23 @@ html,body{
   background:#020617;color:#0f172a;
   font-family:"Segoe UI Variable","Segoe UI",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
 }
+body.light-theme{
+  background:#e5e7eb;
+}
+body.light-theme .win{
+  background:rgba(248,250,252,0.98);
+  color:#020617;
+}
+body.light-theme .wbody{
+  color:#020617;
+}
+body.light-theme .whead{
+  background:linear-gradient(90deg,rgba(209,213,219,0.8),rgba(148,163,184,0.9));
+}
+body.light-theme .task-button.active{
+  background:rgba(148,163,184,0.5);
+}
+
 #desktop{
   position:absolute;inset:0;
   /* Windows 11-style light wallpaper with blue swirl cluster (no actual MS asset) */
@@ -545,7 +562,7 @@ canvas{
   gap:10px;
 }
 .settings-sidebar{
-  width:140px;
+  width:160px;
   border-radius:12px;
   background:#020617;
   padding:10px;
@@ -617,6 +634,70 @@ canvas{
   color:#9ca3af;
   margin-top:8px;
 }
+.settings-toggle-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:8px 0;
+  border-bottom:1px solid #1f2937;
+  gap:10px;
+}
+.settings-toggle-label{
+  font-weight:500;
+}
+.settings-toggle-sub{
+  font-size:11px;
+  color:#9ca3af;
+}
+.settings-slider-row{
+  margin-top:8px;
+}
+.settings-slider-row label{
+  display:block;
+  font-size:12px;
+  margin-bottom:4px;
+}
+.settings-slider-row input[type=range]{
+  width:100%;
+}
+
+/* Toggle switch */
+.switch{
+  position:relative;
+  display:inline-block;
+  width:38px;
+  height:20px;
+}
+.switch input{
+  opacity:0;
+  width:0;
+  height:0;
+}
+.slider{
+  position:absolute;
+  cursor:pointer;
+  top:0;left:0;right:0;bottom:0;
+  background:#4b5563;
+  border-radius:999px;
+  transition:.2s;
+}
+.slider:before{
+  position:absolute;
+  content:"";
+  height:14px;
+  width:14px;
+  left:3px;
+  top:3px;
+  background:#f9fafb;
+  border-radius:50%;
+  transition:.2s;
+}
+.switch input:checked + .slider{
+  background:#1d4ed8;
+}
+.switch input:checked + .slider:before{
+  transform:translateX(18px);
+}
 
 /* Task view overlay */
 #taskview-overlay{
@@ -662,6 +743,31 @@ canvas{
   font-size:11px;
   color:#9ca3af;
 }
+
+/* Context menu */
+#context-menu{
+  position:absolute;
+  z-index:500;
+  background:#020617;
+  border:1px solid #9ca3af;
+  border-radius:6px;
+  box-shadow:0 12px 30px rgba(0,0,0,0.85);
+  display:none;
+  font-size:12px;
+  min-width:150px;
+  color:#f9fafb;
+}
+.context-item{
+  padding:7px 12px;
+  cursor:pointer;
+  color:#f9fafb;
+}
+.context-item + .context-item{
+  border-top:1px solid #111827;
+}
+.context-item:hover{
+  background:#1f2937;
+}
 </style>
 </head>
 <body>
@@ -676,6 +782,10 @@ canvas{
   </div>
   <div class="icon" style="top:220px;left:20px" data-app="files">
     <div class="icon-inner">🗂️</div><div class="icon-label">Files</div>
+  </div>
+  <!-- YouTube shortcut -->
+  <div class="icon" style="top:320px;left:20px" data-app="youtube">
+    <div class="icon-inner">▶️</div><div class="icon-label">YouTube</div>
   </div>
 
   <!-- Games -->
@@ -704,6 +814,10 @@ canvas{
   </div>
   <div class="icon" style="top:120px;left:260px" data-app="settings">
     <div class="icon-inner">⚙️</div><div class="icon-label">Settings</div>
+  </div>
+  <!-- Trash / Recycle Bin -->
+  <div class="icon" style="top:220px;left:260px" data-app="trash">
+    <div class="icon-inner">🗑️</div><div class="icon-label">Recycle Bin</div>
   </div>
 </div>
 
@@ -778,6 +892,9 @@ canvas{
   <div id="taskview-inner"></div>
 </div>
 
+<!-- Context menu -->
+<div id="context-menu"></div>
+
 <!-- Taskbar -->
 <div id="taskbar">
   <div id="taskbar-inner">
@@ -835,11 +952,15 @@ let zCounter = 100;
 const windowsMap = new Map();
 const desktop = document.getElementById("desktop");
 let dynamicIconCount = 1;
+const trashItems = [];
+let themeMode = "dark";
+let showDesktopIcons = true;
 
 const appMeta = {
   browser:{label:"Browser",icon:"🌐"},
   notes:{label:"Notes",icon:"📝"},
   files:{label:"Files",icon:"🗂️"},
+  youtube:{label:"YouTube",icon:"▶️"},
   snake:{label:"Snake",icon:"🐍"},
   tetris:{label:"Tetris",icon:"🧱"},
   pong:{label:"Pong",icon:"🏓"},
@@ -850,8 +971,20 @@ const appMeta = {
   paint:{label:"Paint",icon:"🎨"},
   music:{label:"Music",icon:"🎵"},
   weather:{label:"Weather",icon:"☀️"},
-  settings:{label:"Settings",icon:"⚙️"}
+  settings:{label:"Settings",icon:"⚙️"},
+  trash:{label:"Recycle Bin",icon:"🗑️"}
 };
+
+/* ---------- Theme & desktop helpers ---------- */
+function setTheme(mode){
+  themeMode = mode;
+  document.body.classList.toggle("light-theme", mode==="light");
+}
+function applyDesktopIconsVisibility(){
+  document.querySelectorAll(".icon").forEach(ic=>{
+    ic.style.display = showDesktopIcons ? "block" : "none";
+  });
+}
 
 /* ---------- Clock ---------- */
 function updateClock(){
@@ -975,6 +1108,66 @@ function closeWindow(appId){
   windowsMap.delete(appId);
 }
 
+/* ---------- Trash helpers ---------- */
+function deleteIcon(icon){
+  const appId = icon.getAttribute("data-app") || "unknown";
+  if(appId === "trash") return; // don't delete the trash itself
+  const meta = appMeta[appId];
+  trashItems.push({
+    type:"shortcut",
+    appId,
+    label:(meta && meta.label) ? meta.label : appId
+  });
+  icon.remove();
+}
+function deleteFileItem(li){
+  const name = li.dataset.fileName || li.textContent || "File";
+  trashItems.push({
+    type:"file",
+    name
+  });
+  li.remove();
+}
+function renderTrashList(root){
+  const list = root.querySelector("#trash-list");
+  if(!list) return;
+  list.innerHTML = "";
+  if(trashItems.length===0){
+    const li = document.createElement("li");
+    li.textContent = "Trash is empty.";
+    list.appendChild(li);
+    return;
+  }
+  trashItems.forEach(item=>{
+    const li = document.createElement("li");
+    if(item.type==="shortcut"){
+      li.textContent = "Shortcut: " + (item.label || item.appId);
+    }else if(item.type==="file"){
+      li.textContent = "File: " + item.name;
+    }
+    list.appendChild(li);
+  });
+}
+function restoreAllFromTrash(){
+  trashItems.forEach(item=>{
+    if(item.type==="shortcut"){
+      addDesktopIcon(item.appId);
+    }else if(item.type==="file"){
+      const info = windowsMap.get("files");
+      if(info){
+        const list = info.window.querySelector("#file-list");
+        if(list){
+          const li = document.createElement("li");
+          li.textContent = item.name;
+          li.dataset.fileName = item.name;
+          list.appendChild(li);
+        }
+      }
+    }
+  });
+  trashItems.length = 0;
+}
+
 /* ---------- Open App ---------- */
 function openApp(appId){
   if(windowsMap.has(appId)){
@@ -984,6 +1177,9 @@ function openApp(appId){
     bringToFront(w);
     info.minimized = false;
     info.taskButton.classList.add("active");
+    if(appId === "trash") {
+      renderTrashList(w);
+    }
     return;
   }
 
@@ -1038,6 +1234,16 @@ function openApp(appId){
 </div>`;
       }
     });
+
+  }else if(appId==="youtube"){
+    title = "YouTube";
+    body.innerHTML = `
+      <p style="margin-top:4px;margin-bottom:8px;">YouTube has been opened in a new tab.</p>
+      <p style="font-size:12px;color:#9ca3af;">
+        This is a shortcut. For full YouTube, use the real browser tab that just opened.
+      </p>`;
+    window.open("https://www.youtube.com","_blank");
+
   }else if(appId==="notes"){
     body.innerHTML = "<textarea spellcheck='false'>Type here...</textarea>";
   }else if(appId==="files"){
@@ -1103,22 +1309,38 @@ function openApp(appId){
       <div class="settings-layout">
         <div class="settings-sidebar">
           <div class="settings-sidebar-title">Settings</div>
-          <div class="settings-sidebar-item active">System</div>
+          <div class="settings-sidebar-item active" data-section="system">System</div>
           <div class="settings-sidebar-item" data-section="personalization">Personalization</div>
+          <div class="settings-sidebar-item" data-section="sound">Sound</div>
+          <div class="settings-sidebar-item" data-section="network">Network & internet</div>
+          <div class="settings-sidebar-item" data-section="about">About</div>
         </div>
-        <div class="settings-main">
-          <div class="settings-section-title">Personalization & wallpaper</div>
-          <div class="wallpaper-grid">
-            <div class="wallpaper-thumb wallpaper-thumb-default active" data-wallpaper="default"></div>
-            <div class="wallpaper-thumb wallpaper-thumb-dark" data-wallpaper="dark"></div>
-            <div class="wallpaper-thumb wallpaper-thumb-blue" data-wallpaper="blue"></div>
-          </div>
-          <div class="settings-note">
-            Choose a wallpaper preset. You can also drag &amp; drop an image file onto the desktop to use it as a background.
-          </div>
-        </div>
+        <div class="settings-main"></div>
       </div>`;
     setupSettings(body);
+  }else if(appId==="trash"){
+    title = "Recycle Bin";
+    body.innerHTML = `
+      <p>Recycle Bin</p>
+      <ul id="trash-list" style="padding-left:18px;margin-top:6px;"></ul>
+      <div style="margin-top:8px;display:flex;gap:8px;">
+        <button id="trash-restore">Restore all</button>
+        <button id="trash-empty">Empty trash</button>
+      </div>
+      <p style="font-size:11px;color:#9ca3af;margin-top:6px;">
+        Right-click desktop icons or files and choose Delete to send them here.
+      </p>`;
+    renderTrashList(body);
+    const restoreBtn = body.querySelector("#trash-restore");
+    const emptyBtn = body.querySelector("#trash-empty");
+    restoreBtn.addEventListener("click", ()=>{
+      restoreAllFromTrash();
+      renderTrashList(body);
+    });
+    emptyBtn.addEventListener("click", ()=>{
+      trashItems.length = 0;
+      renderTrashList(body);
+    });
   }
 
   titleEl.textContent = title;
@@ -1182,6 +1404,7 @@ document.addEventListener("drop", function(e){
         if(list){
           const li = document.createElement("li");
           li.textContent = name;
+          li.dataset.fileName = name;
           list.appendChild(li);
         }
       }
@@ -1198,6 +1421,7 @@ document.addEventListener("drop", function(e){
       if(list){
         const li = document.createElement("li");
         li.textContent = name;
+        li.dataset.fileName = name;
         list.appendChild(li);
       }
     }
@@ -1227,7 +1451,7 @@ const tileBt = document.getElementById("tile-bt");
 const tileAirplane = document.getElementById("tile-airplane");
 
 const pinnedApps = new Set([
-  "browser","notes","files",
+  "browser","youtube","notes","files",
   "snake","tetris","pong","flappy","mines","g2048","store","settings","weather"
 ]);
 
@@ -1357,6 +1581,7 @@ function addDesktopIcon(appId){
   desktop.appendChild(icon);
   setupIcon(icon);
   dynamicIconCount++;
+  applyDesktopIconsVisibility();
 }
 
 function installApp(appId){
@@ -1405,8 +1630,8 @@ function buildStoreApps(container){
 }
 
 /* ---------- Settings helpers ---------- */
-function setupSettings(root){
-  const thumbs = root.querySelectorAll(".wallpaper-thumb");
+function setupWallpaperControls(main){
+  const thumbs = main.querySelectorAll(".wallpaper-thumb");
   thumbs.forEach(thumb=>{
     thumb.addEventListener("click", ()=>{
       thumbs.forEach(t=>t.classList.remove("active"));
@@ -1425,6 +1650,171 @@ function setupSettings(root){
       }
     });
   });
+}
+
+function setupSettings(root){
+  const sidebar = root.querySelector(".settings-sidebar");
+  const main = root.querySelector(".settings-main");
+  const items = sidebar.querySelectorAll(".settings-sidebar-item");
+
+  function renderSection(section){
+    if(section==="system"){
+      main.innerHTML = `
+        <div class="settings-section-title">System</div>
+        <p style="margin-bottom:8px;">Basic system preferences and appearance.</p>
+        <div class="settings-toggle-row">
+          <div>
+            <div class="settings-toggle-label">Light theme</div>
+            <div class="settings-toggle-sub">Make window surfaces light instead of dark.</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggle-theme">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="settings-toggle-row">
+          <div>
+            <div class="settings-toggle-label">Focus mode (mock)</div>
+            <div class="settings-toggle-sub">Visual only – no notifications here.</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="settings-slider-row">
+          <label>UI scale (mock)</label>
+          <input type="range" min="75" max="125" value="100">
+        </div>
+      `;
+      const themeToggle = main.querySelector("#toggle-theme");
+      if(themeToggle){
+        themeToggle.checked = (themeMode==="light");
+        themeToggle.addEventListener("change", ()=>{
+          setTheme(themeToggle.checked ? "light" : "dark");
+        });
+      }
+
+    }else if(section==="personalization"){
+      main.innerHTML = `
+        <div class="settings-section-title">Personalization</div>
+        <p style="margin-bottom:8px;">Wallpaper and desktop icons.</p>
+        <div class="wallpaper-grid">
+          <div class="wallpaper-thumb wallpaper-thumb-default active" data-wallpaper="default"></div>
+          <div class="wallpaper-thumb wallpaper-thumb-dark" data-wallpaper="dark"></div>
+          <div class="wallpaper-thumb wallpaper-thumb-blue" data-wallpaper="blue"></div>
+        </div>
+        <div class="settings-toggle-row" style="margin-top:8px;border-bottom:none;">
+          <div>
+            <div class="settings-toggle-label">Show desktop icons</div>
+            <div class="settings-toggle-sub">Hide or show all icons on the desktop.</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggle-icons">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="settings-note">
+          You can also drag &amp; drop an image file onto the desktop to set a custom wallpaper.
+        </div>
+      `;
+      setupWallpaperControls(main);
+      const toggleIcons = main.querySelector("#toggle-icons");
+      if(toggleIcons){
+        toggleIcons.checked = showDesktopIcons;
+        toggleIcons.addEventListener("change", ()=>{
+          showDesktopIcons = toggleIcons.checked;
+          applyDesktopIconsVisibility();
+        });
+      }
+
+    }else if(section==="sound"){
+      main.innerHTML = `
+        <div class="settings-section-title">Sound</div>
+        <p style="margin-bottom:8px;">Master volume is linked to the quick settings slider.</p>
+        <div class="settings-slider-row">
+          <label>Master volume</label>
+          <input type="range" id="settings-volume" min="0" max="100" value="${volSlider.value}">
+        </div>
+        <div class="settings-toggle-row" style="border-bottom:none;margin-top:8px;">
+          <div>
+            <div class="settings-toggle-label">System sounds (mock)</div>
+            <div class="settings-toggle-sub">Visual only in this emulator.</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+      `;
+      const sVol = main.querySelector("#settings-volume");
+      if(sVol){
+        sVol.addEventListener("input", ()=>{
+          volSlider.value = sVol.value;
+          const v = volSlider.value;
+          batteryStatus.textContent = "100% • Volume " + v + "%";
+        });
+      }
+
+    }else if(section==="network"){
+      const wifiOn = tileWifi.classList.contains("active");
+      main.innerHTML = `
+        <div class="settings-section-title">Network & internet</div>
+        <p style="margin-bottom:8px;">Wi-Fi status mirrors the quick settings tile.</p>
+        <div class="settings-toggle-row" style="border-bottom:none;">
+          <div>
+            <div class="settings-toggle-label">Wi-Fi</div>
+            <div class="settings-toggle-sub">Turn Wi-Fi on or off (visual only).</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggle-wifi">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="settings-note" id="wifi-status-note"></div>
+      `;
+      const toggleWifi = main.querySelector("#toggle-wifi");
+      const wifiNote = main.querySelector("#wifi-status-note");
+      if(toggleWifi){
+        toggleWifi.checked = wifiOn;
+        wifiNote.textContent = wifiOn ? "Connected (mock status)." : "Wi-Fi is off.";
+        toggleWifi.addEventListener("change", ()=>{
+          tileWifi.classList.toggle("active", toggleWifi.checked);
+          wifiNote.textContent = toggleWifi.checked ? "Connected (mock status)." : "Wi-Fi is off.";
+        });
+      }
+
+    }else if(section==="about"){
+      main.innerHTML = `
+        <div class="settings-section-title">About</div>
+        <p style="margin-bottom:8px;">Device and emulator details (all fake, just for fun).</p>
+        <p style="font-size:12px;">
+          <strong>Device name:</strong> Win11-Emulator<br>
+          <strong>Processor:</strong> Virtual Quad-Core @ 3.60 GHz<br>
+          <strong>Installed RAM:</strong> 16.0 GB (emulated)<br>
+          <strong>System type:</strong> 64-bit operating system, x64-based processor<br>
+        </p>
+        <p style="font-size:12px;margin-top:6px;">
+          <strong>Edition:</strong> Windows 11 Emulator<br>
+          <strong>Version:</strong> 1.0 (GitHub build)<br>
+        </p>
+        <p class="settings-note" style="margin-top:10px;">
+          None of this is a real OS. It’s just HTML, CSS and JavaScript pretending very hard.
+        </p>
+      `;
+    }
+  }
+
+  items.forEach(item=>{
+    item.addEventListener("click", ()=>{
+      items.forEach(i=>i.classList.remove("active"));
+      item.classList.add("active");
+      const section = item.getAttribute("data-section");
+      renderSection(section);
+    });
+  });
+
+  renderSection("system");
 }
 
 /* ---------- Extra mini app (Paint) ---------- */
@@ -1880,6 +2270,68 @@ function start2048(canvas){
 
   addTile(); addTile(); draw();
 }
+
+/* ---------- Context menu for icons and files ---------- */
+const contextMenu = document.getElementById("context-menu");
+let contextTarget = null;
+let contextType = null; // "icon" or "file"
+
+document.addEventListener("contextmenu", e=>{
+  const icon = e.target.closest(".icon");
+  const fileItem = e.target.closest("li[data-file-name]");
+  if(icon || fileItem){
+    e.preventDefault();
+    contextTarget = icon || fileItem;
+    contextType = icon ? "icon" : "file";
+
+    contextMenu.innerHTML = "";
+    const openItem = document.createElement("div");
+    openItem.className = "context-item";
+    openItem.textContent = "Open";
+    openItem.addEventListener("click", ()=>{
+      if(contextType==="icon"){
+        const appId = contextTarget.getAttribute("data-app");
+        openApp(appId);
+      }
+      // For files, could be extended later
+      hideContextMenu();
+    });
+
+    const deleteItem = document.createElement("div");
+    deleteItem.className = "context-item";
+    deleteItem.textContent = "Delete";
+    deleteItem.addEventListener("click", ()=>{
+      if(contextType==="icon"){
+        deleteIcon(contextTarget);
+      }else if(contextType==="file"){
+        deleteFileItem(contextTarget);
+      }
+      hideContextMenu();
+    });
+
+    contextMenu.appendChild(openItem);
+    contextMenu.appendChild(deleteItem);
+
+    contextMenu.style.left = e.clientX + "px";
+    contextMenu.style.top  = e.clientY + "px";
+    contextMenu.style.display = "block";
+  }else{
+    hideContextMenu();
+  }
+});
+document.addEventListener("click", e=>{
+  if(!e.target.closest("#context-menu")){
+    hideContextMenu();
+  }
+});
+function hideContextMenu(){
+  contextMenu.style.display = "none";
+  contextTarget = null;
+  contextType = null;
+}
+
+/* Apply initial icon visibility (in case we toggle later) */
+applyDesktopIconsVisibility();
 </script>
 </body>
 </html>
